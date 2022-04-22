@@ -89,7 +89,10 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
   def uploadFile() = Action {
     implicit request: Request[AnyContent] => {
       val formData = request.body.asMultipartFormData.get
-      if ((formData.files != None) && (formData.files.length > 0)) {
+      if (formData.badParts.length > 0) {
+        Ok(Json.obj({"error" -> true}))
+      }
+      else if ((formData.files != None) && (formData.files.length > 0)) {
         val uploadDone: Boolean = (formData.dataParts.getOrElse("done", Seq("true"))(0) == "true")
         val base64: String = formData.dataParts.getOrElse("name", Seq("TmV3JTIwRmlsZQ=="))(0)
         val base64Decoded: Array[Byte] = Base64.getDecoder().decode(base64)
@@ -124,8 +127,11 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
             renameCount += 1;
           }
         }
+        Ok(Json.obj({"error" -> false}))
       }
-      Ok("")
+      else {
+        Ok(Json.obj({"error" -> true}))
+      }
     }
   }
 
