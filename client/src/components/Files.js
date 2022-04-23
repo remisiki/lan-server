@@ -4,8 +4,10 @@ import { timestampToTime } from './utils/time';
 import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox } from './utils/dom';
 import axios from 'axios';
 import { MessageBox } from './MessageBox';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
-function File({name, time, type, onClick}) {
+function File({name, time, type, thumb, onClick}) {
 	let icon_src;
 	switch (type) {
 		case 'folder':
@@ -14,11 +16,19 @@ function File({name, time, type, onClick}) {
 		default:
 			icon_src = 'file.svg';
 	}
-	icon_src = `/assets/${icon_src}`;
+	if (thumb) {
+		icon_src = `/api/v1/thumb?path=${thumb}`;
+	}
+	else {
+		icon_src = `/assets/${icon_src}`;
+	}
   return (
     <div className="cell" onClick={onClick}>
     	<div className="img-container">
-    		<img src={icon_src} alt="" />
+    		<LazyLoadImage
+          src={icon_src}
+          effect={(thumb) ? "blur" : "opacity"}
+        />
       </div>
       <span className="title">{name}</span>
       <br />
@@ -56,12 +66,15 @@ function Files(props) {
 		  		/>);
 		  }
 		  for (const file of response.files) {
+		  	const type = (file.thumb) ? "img" : "file";
+		  	const thumb = (file.thumb) ? (file.thumb) : null;
 		  	li.push(
 		  		<File
 			  		key={`f-${file.name}`}
 			  		name={file.name}
 			  		time={file.time}
-			  		type="file"
+			  		type={type}
+			  		thumb={thumb}
 			  		onClick={() => {
 			  			const path = `${props.path}${file.name}`;
 			  			const base64 = window.btoa(encodeURIComponent(path));

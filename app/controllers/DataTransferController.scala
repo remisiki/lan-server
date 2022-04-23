@@ -1,15 +1,12 @@
 package controllers
 
+import util.util
 import javax.inject._
 import java.io.{File, FileOutputStream}
 import java.nio.file.{Paths, Files}
-import java.util.Base64
-import java.nio.charset.StandardCharsets
-import java.net.{URLEncoder, URLDecoder}
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.libs.json.Json
 import play.api.http.HttpEntity
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
@@ -25,9 +22,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
 
   def downloadFile(base64: String) = Action {
     implicit request: Request[AnyContent] => {
-      val base64Decoded: Array[Byte] = Base64.getDecoder().decode(base64)
-      val strDecoded: String = new String(base64Decoded, StandardCharsets.UTF_8)
-      val uriDecoded: String = URLDecoder.decode(strDecoded, StandardCharsets.UTF_8)
+      val uriDecoded: String = util.decodeBase64(base64)
       val absolutePath: String = Paths.get(sharePath, uriDecoded).normalize().toString()
       val topPath: String = Paths.get(sharePath).normalize().toString()
       if (!absolutePath.startsWith(topPath)) {
@@ -38,8 +33,8 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
       }
       else {
         val file: File = new File(absolutePath)
-        val uriEncodedFileName: String = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8).replace("+", "%20")
-        val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(absolutePath))
+        val uriEncodedFileName: String = util.encodeUri(file.getName())
+        val source: Source[ByteString, _] = FileIO.fromFile(file)
         val mimeTypes = Map(
           ".txt" -> "text/plain",
           ".html" -> "text/html",
@@ -73,8 +68,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
           ".tar" -> "application/x-tar",
           ".tar.gz" -> "application/x-tar"
         )
-        val extensionPattern: Regex = "(\\.[^.]+)$".r
-        val ext: String = extensionPattern.findFirstMatchIn(absolutePath).getOrElse("").toString()
+        val ext: String = util.getExt(absolutePath)
         val contentType: String = mimeTypes getOrElse(ext, "application/octet-stream")
         Result(
           header = ResponseHeader(200, Map(
@@ -95,9 +89,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
       else if ((formData.files != None) && (formData.files.length > 0)) {
         val uploadDone: Boolean = (formData.dataParts.getOrElse("done", Seq("true"))(0) == "true")
         val base64: String = formData.dataParts.getOrElse("name", Seq("TmV3JTIwRmlsZQ=="))(0)
-        val base64Decoded: Array[Byte] = Base64.getDecoder().decode(base64)
-        val strDecoded: String = new String(base64Decoded, StandardCharsets.UTF_8)
-        val fileName: String = URLDecoder.decode(strDecoded, StandardCharsets.UTF_8)
+        val fileName: String = util.decodeBase64(base64)
         var publicPath: String = s"${sharePath}public/"
         var filePath = s"${publicPath}${fileName}"
         val progressFilePath = s"${publicPath}${fileName}.scupload"
