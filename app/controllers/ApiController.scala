@@ -21,6 +21,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 
   def getFileList(path: String) = Action {
     implicit request: Request[AnyContent] => {
+      // util.getAudioMeta()
       val absolutePath: String = Paths.get(sharePath, path).normalize().toString()
       val topPath: String = Paths.get(sharePath).normalize().toString()
       if (!absolutePath.startsWith(topPath)) {
@@ -32,7 +33,6 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
       else {
         val directory: File = new File(absolutePath)
         val imagePath: String = Paths.get(absolutePath, "public").normalize().toString()
-        // util.generateThumbnails(imagePath)
         if (directory.exists && directory.isDirectory) {
           val allItems: Array[File] = directory.listFiles
           val folders: List[JsObject] = allItems.filter(_.isDirectory).toList.map(x => 
@@ -41,18 +41,21 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
               "time" -> x.lastModified
             )
           )
-          val files: List[JsObject] = allItems.filter(_.isFile).toList.map(x => 
+          val files: List[JsObject] = allItems.filter(_.isFile).toList.map(x => {
+            val fileName: String = x.getName()
+            val fileType: String = util.getFileType(fileName)
             Json.obj(
-              "name" -> x.getName(),
+              "name" -> fileName,
               "time" -> x.lastModified,
+              "fileType" -> fileType,
               "thumb" -> {
-                if (util.isImage(x.getName()))
+                if (util.fileHasThumb(fileType))
                   util.encodeBase64(x.getAbsolutePath())
                 else
                   false
               }
             )
-          )
+          })
           val jsonData: JsObject = Json.obj("empty" -> false, "folders" -> folders, "files" -> files)
           Ok(jsonData)
         } else {
@@ -73,7 +76,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
         NotFound("Thumbnail Not Found")
       }
       else {
-        val source: Source[ByteString, _] = FileIO.fromFile(image)
+        val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(cacheFilePath))
         Result(
           header = ResponseHeader(200, Map()),
           body = HttpEntity.Streamed(source, Some(image.length()), Some("image/jpeg"))

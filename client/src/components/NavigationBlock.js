@@ -20,8 +20,8 @@ function NavigationBlock(props) {
       <div className="guide-container">
       </div>
       <div className="right-action-container">
-        <div className="title-right" id="back-btn" onClick={backActionHandler} style={{content: "url(/assets/back.png)"}}></div>
-        <div className="title-right" id="home-btn" onClick={homeActionHandler} style={{content: "url(/assets/home.png)"}}></div>
+        <div className="title-right" id="back-btn" onClick={backActionHandler} style={{content: "url(/assets/back.svg)"}}></div>
+        <div className="title-right" id="home-btn" onClick={homeActionHandler} style={{content: "url(/assets/home.svg)"}}></div>
         <FileUploader />
       </div>
       <div id="progress-bar"></div>

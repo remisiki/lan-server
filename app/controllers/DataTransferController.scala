@@ -34,8 +34,8 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
       else {
         val file: File = new File(absolutePath)
         val uriEncodedFileName: String = util.encodeUri(file.getName())
-        val source: Source[ByteString, _] = FileIO.fromFile(file)
-        val mimeTypes = Map(
+        val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(absolutePath))
+        val mimeTypes: Map[String, String] = Map(
           ".txt" -> "text/plain",
           ".html" -> "text/html",
           ".js" -> "text/javascript",

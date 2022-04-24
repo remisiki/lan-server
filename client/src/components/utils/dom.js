@@ -72,4 +72,20 @@ function toggleMessageBox(text = "", duration = 2000) {
 	}, duration);
 }
 
-export { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox };
+function imgLoadErrorFallback(e, file_type) {
+	const img = e.target;
+	let icon_src;
+	switch (file_type) {
+		case 'image':
+			icon_src = '/assets/image.svg';
+			break;
+		case 'video':
+			icon_src = '';
+			break;
+		default:
+			icon_src = '';
+	}
+	img.src = icon_src;
+}
+
+export { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback };
