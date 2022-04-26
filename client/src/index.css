@@ -58,14 +58,15 @@ img {
 
 .cell {
 	position: relative;
-	width: 13vw;
-	height: 20vh;
+	width: 11vw;
+	height: 150px;
 	margin-left: 1em;
 	margin-bottom: 1em;
 }
 
 .cell.narrow {
-	width: 12vw;
+	width: 12.5vw;
+	height: 170px;
 }
 
 .cell:hover {
@@ -75,9 +76,17 @@ img {
 	-webkit-transform: scale(1.05);
 }
 
+.cell.selected {
+	background-color: rgba(48, 56, 65, 1.0);
+}
+
+.cell.selected span {
+	color: #eee;
+}
+
 .cell-container {
 	display: inline-grid;
-	grid-template-columns: repeat(6, 1fr);
+	grid-template-columns: repeat(7, 1fr);
 	grid-template-rows: auto;
 	position: absolute;
 	left: 0;
@@ -93,7 +102,7 @@ img {
 }
 
 .cell .img-container{
-	height: 70%;
+	height: 80%;
 	overflow: hidden;
 }
 
@@ -104,8 +113,8 @@ img {
 
 .cell .title {
 	font-weight: bold;
-	/*font-size: 150%;*/
 	user-select: none;
+	margin-top: 10px;
 }
 
 .cell .content {
@@ -211,7 +220,7 @@ img {
 	top: 0;
 }
 
-span {
+.cell span {
 	display: inline-block;
 	width: 100%;
 	white-space: nowrap;
@@ -387,6 +396,7 @@ span {
 	overflow: scroll;
 	max-height: 20%;
 	font-size: 150%;
+	overflow-wrap: break-word;
 }
 
 .info {

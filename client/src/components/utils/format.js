@@ -18,7 +18,7 @@ export function sizeFormat(size) {
 	let x = size / 1024;
 	let multiplier = 0;
 	const unit = ['B', 'KB', 'MB', 'GB', 'TB'];
-	while (x > 0.5) {
+	while (x > 0.9) {
 		multiplier ++;
 		x /= 1024;
 	}

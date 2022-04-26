@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { get } from './http/request';
 import { timeFormat } from './utils/format';
-import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar } from './utils/dom';
+import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar, setFileSelected } from './utils/dom';
 import { sortFiles } from './utils/sort';
 import axios from 'axios';
 import { MessageBox } from './MessageBox';
@@ -57,8 +57,6 @@ function File({name, time, fileType, thumb, onClick}) {
 				{(fileType === "video") && <img src="/assets/play.svg" className="play-icon" alt="" />}
 			</div>
 			<span className="title">{name}</span>
-			<br />
-			<span className="content">{timeFormat(time)}</span>
 		</div>
 	);
 }
@@ -108,8 +106,9 @@ export function Files(props) {
 						time={file.time}
 						fileType={file.fileType}
 						thumb={thumb}
-						onClick={() => {
+						onClick={(e) => {
 							createSideBar(file, downloadAction);
+							setFileSelected(e);
 						}}
 					/>);
 			}

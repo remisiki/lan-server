@@ -245,7 +245,10 @@ export function createSideBar(file, downloadAction) {
 
 	close_btn.src = '/assets/close.svg';
 	close_btn.classList.add('action-btn');
-	close_btn.addEventListener('click', hideSideBar);
+	close_btn.addEventListener('click', () => {
+		clearFileSelected();
+		hideSideBar();
+	});
 
 	sidebar.id = 'sidebar';
 
@@ -310,4 +313,23 @@ function hideNarrowFilePanel() {
 		cell_container.classList.remove('narrow');
 	}
 	top_btn.classList.remove('narrow');
+}
+
+export function setFileSelected(e) {
+	const files = e.currentTarget.parentNode.children;
+	for (const file of files) {
+		if (file === e.currentTarget) {
+			file.classList.add('selected');
+		}
+		else {
+			file.classList.remove('selected');
+		}
+	}
+}
+
+export function clearFileSelected() {
+	const selected_files = document.querySelectorAll('.cell.selected');
+	for (const file of selected_files) {
+		file.classList.remove('selected');
+	}
 }

@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { FileUploader } from './Files';
+import { hideSideBar, clearFileSelected } from './utils/dom';
 
 export function NavigationBlock(props) {
 	const backActionHandler = () => {
-		if (props.path === '/') return;
-		let paths_copy = props.paths;
-		paths_copy.shift();
-		props.setPaths(paths_copy);
-		props.setPath(props.paths[0]);
+		if (document.getElementById('sidebar')) {
+			clearFileSelected();
+			hideSideBar();
+		}
+		else {
+			if (props.path === '/') return;
+			let paths_copy = props.paths;
+			paths_copy.shift();
+			props.setPaths(paths_copy);
+			props.setPath(props.paths[0]);
+		}
 	};
 	const homeActionHandler = () => {
 		props.setPaths(['/']);
