@@ -48,6 +48,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
               "name" -> fileName,
               "time" -> x.lastModified,
               "fileType" -> fileType,
+              "size" -> x.length,
               "thumb" -> {
                 if (util.fileHasThumb(fileType))
                   util.encodeBase64(x.getAbsolutePath())

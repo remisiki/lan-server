@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { get } from './http/request';
-import { timestampToTime } from './utils/time';
-import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector } from './utils/dom';
+import { timeFormat } from './utils/format';
+import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar } from './utils/dom';
 import { sortFiles } from './utils/sort';
 import axios from 'axios';
 import { MessageBox } from './MessageBox';
@@ -58,7 +58,7 @@ function File({name, time, fileType, thumb, onClick}) {
 			</div>
 			<span className="title">{name}</span>
 			<br />
-			<span className="content">{timestampToTime(time)}</span>
+			<span className="content">{timeFormat(time)}</span>
 		</div>
 	);
 }
@@ -67,6 +67,7 @@ export function Files(props) {
 	const [data, setData] = useState(false);
 	const [fileSort, setFileSort] = useState({by: "time", descending: true});
 	useEffect(() => {
+		hideSideBar();
 		const url = '/api/v1/file_list';
 		const params = {
 			path: props.path
@@ -94,6 +95,12 @@ export function Files(props) {
 			}
 			for (const file of response.files) {
 				const thumb = (file.thumb) ? (file.thumb) : null;
+				const downloadAction = () => {
+					const path = `${props.path}${file.name}`;
+					const base64 = window.btoa(encodeURIComponent(path));
+					const url = `/download/${base64}`;
+					window.open(url, '_blank').focus();
+				};
 				li.push(
 					<File
 						key={`f-${file.name}`}
@@ -102,10 +109,7 @@ export function Files(props) {
 						fileType={file.fileType}
 						thumb={thumb}
 						onClick={() => {
-							const path = `${props.path}${file.name}`;
-							const base64 = window.btoa(encodeURIComponent(path));
-							const url = `/download/${base64}`;
-							window.open(url, '_blank').focus();
+							createSideBar(file, downloadAction);
 						}}
 					/>);
 			}

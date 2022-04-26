@@ -1,3 +1,5 @@
+import { timeFormat, sizeFormat } from './format';
+
 export function uploadProgressHandler(e, sent, size) {
 	const progress_bar = document.getElementById('progress-bar');
 	const sent_sum = e.loaded + sent;
@@ -111,7 +113,7 @@ export function toggleSortPanel(props) {
 	else {
 		sort_panel.classList.remove('slide-in');
 		setTimeout(() => {
-			directory_panel.removeChild(sort_panel);
+			sort_panel.remove();
 		}, 200);
 	}
 }
@@ -140,6 +142,26 @@ function createSortOption(name, props) {
 	return option_container;
 }
 
+function createSideOption(name, icon, onClick) {
+	const option_container = document.createElement('div');
+	const before_option = document.createElement('div');
+	const option = document.createElement('div');
+
+	option_container.classList.add('option-container');
+	before_option.classList.add('before-option');
+	before_option.style.backgroundImage = `url(${icon})`;
+
+	option.innerText = name;
+	option.classList.add('option');
+
+	option_container.id = `side-option-${name}`;
+	option_container.appendChild(before_option);
+	option_container.appendChild(option);
+	option_container.addEventListener('click', onClick);
+
+	return option_container;
+}
+
 function setOptionSelected(name, props) {
 	const sort_panel = document.getElementById('sort-panel');
 	const sort_selector = document.getElementById('sort-selector');
@@ -161,4 +183,131 @@ export function sortDirectionSelector(props) {
 	const sort_direction = document.getElementById('sort-direction');
 	sort_direction.classList.toggle('reverse-z');
 	props.setFileSort({by: props.fileSort.by, descending: !props.fileSort.descending});
-};
+}
+
+export function getIconOfFileType(file_type, thumb) {
+	let icon_src;
+	switch (file_type) {
+		case 'folder':
+			icon_src = '/assets/folder.svg';
+			break;
+		case 'image':
+		case 'video':
+			icon_src = `/api/v1/thumb?path=${thumb}`;
+			break;
+		case 'audio':
+			icon_src = '/assets/audio.svg';
+			break;
+		case 'binary':
+			icon_src = '/assets/puzzle.svg';
+			break;
+		case 'pdf':
+			icon_src = '/assets/pdf.svg';
+			break;
+		case 'archieve':
+			icon_src = '/assets/archieve.svg';
+			break;
+		case 'msword':
+			icon_src = '/assets/msword.svg';
+			break;
+		case 'mspowerpoint':
+			icon_src = '/assets/mspowerpoint.svg';
+			break;
+		case 'msexcel':
+			icon_src = '/assets/msexcel.svg';
+			break;
+		case 'code':
+			icon_src = '/assets/code.svg';
+			break;
+		case 'file':
+		default:
+			icon_src = '/assets/file.svg';
+	}
+	return icon_src;
+}
+
+export function createSideBar(file, downloadAction) {
+	showNarrowFilePanel();
+	const sidebar_exist = document.getElementById('sidebar');
+	if (sidebar_exist) {
+		sidebar_exist.classList.remove('slide-in');
+		setTimeout(() => {
+			sidebar_exist.remove();
+		}, 100);
+	}
+	const sidebar = document.createElement('div');
+	const directory_panel = document.getElementById('directory-panel');
+	const thumb = document.createElement('div');
+	const name = document.createElement('div');
+	const time = document.createElement('div');
+	const size = document.createElement('div');
+	const close_btn = document.createElement('img');
+
+	close_btn.src = '/assets/close.svg';
+	close_btn.classList.add('action-btn');
+	close_btn.addEventListener('click', hideSideBar);
+
+	sidebar.id = 'sidebar';
+
+	const thumb_src = getIconOfFileType(file.fileType, (file.thumb) ? (file.thumb) : null);
+	thumb.style.backgroundImage = `url(${thumb_src})`;
+	thumb.classList.add('thumb');
+
+	name.innerText = file.name;
+	name.classList.add('detail');
+	name.classList.add('no-scroll-bar');
+
+	time.innerText = `Last Modified: ${timeFormat(file.time)}`;
+	time.classList.add('info');
+
+	size.innerText = `Size: ${sizeFormat(file.size)}`;
+	size.classList.add('info');
+
+	sidebar.appendChild(close_btn);
+	sidebar.appendChild(thumb);
+	sidebar.appendChild(name);
+	sidebar.appendChild(size);
+	sidebar.appendChild(time);
+	sidebar.appendChild(createSideOption('Download', '/assets/download.svg', downloadAction));
+	directory_panel.appendChild(sidebar);
+	setTimeout(() => {
+		sidebar.classList.add('slide-in');
+	}, 100);
+}
+
+export function hideSideBar() {
+	const sidebar = document.getElementById('sidebar');
+	if (sidebar) {
+		sidebar.classList.remove('slide-in');
+		setTimeout(() => {
+			sidebar.remove();
+			hideNarrowFilePanel();
+		}, 100);
+	}
+}
+
+function showNarrowFilePanel() {
+	const cells = document.getElementsByClassName('cell');
+	const cell_containers = document.getElementsByClassName('cell-container');
+	const top_btn = document.getElementById('totop');
+	for (const cell of cells) {
+		cell.classList.add('narrow');
+	}
+	for (const cell_container of cell_containers) {
+		cell_container.classList.add('narrow');
+	}
+	top_btn.classList.add('narrow');
+}
+
+function hideNarrowFilePanel() {
+	const cells = document.getElementsByClassName('cell');
+	const cell_containers = document.getElementsByClassName('cell-container');
+	const top_btn = document.getElementById('totop');
+	for (const cell of cells) {
+		cell.classList.remove('narrow');
+	}
+	for (const cell_container of cell_containers) {
+		cell_container.classList.remove('narrow');
+	}
+	top_btn.classList.remove('narrow');
+}

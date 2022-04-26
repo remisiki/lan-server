@@ -64,6 +64,10 @@ img {
 	margin-bottom: 1em;
 }
 
+.cell.narrow {
+	width: 12vw;
+}
+
 .cell:hover {
 	transform-origin: center;
 	transform: scale(1.05);
@@ -75,12 +79,17 @@ img {
 	display: inline-grid;
 	grid-template-columns: repeat(6, 1fr);
 	grid-template-rows: auto;
-	position: relative;
+	position: absolute;
 	left: 0;
-	top: 120px;
+	top: 150px;
 	width: 100%;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.cell-container.narrow {
+	grid-template-columns: repeat(5, 1fr);
+	width: 80%;
 }
 
 .cell .img-container{
@@ -286,7 +295,13 @@ span {
 
 .option {
 	display: inline-block;
+	vertical-align: middle;
 	padding: 10px 10px 10px 0;
+}
+
+.option-container {
+	cursor: pointer;
+	user-select: none;
 }
 
 .option-container:hover {
@@ -295,6 +310,7 @@ span {
 
 .before-option {
 	display: inline-block;
+	vertical-align: middle;
 	width: 10px;
 	height: 10px;
 	margin: auto 10px;
@@ -328,6 +344,66 @@ span {
 	bottom: 1em;
 }
 
+#totop.narrow {
+	transform: translateX(-20vw);
+}
+
+#sidebar {
+	position: fixed;
+	top: 64px;
+	right: 0;
+	height: calc(100vh - 64px);
+	width: 0;
+	background-color: rgba(255, 255, 255, 0.9);
+	transition: width 0.1s ease-in-out;
+	border-radius: 15px 0 0 15px;
+}
+
+#sidebar.slide-in {
+	width: 20vw;
+}
+
+#sidebar .thumb {
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	width: 100%;
+	height: 40%;
+}
+
+#sidebar .before-option {
+	height: 25px;
+	width: 25px;
+	margin: 0 20px;
+}
+
+#sidebar .option {
+	padding: 10px;
+}
+
+.detail {
+	padding: 10px;
+	font-weight: bold;
+	overflow: scroll;
+	max-height: 20%;
+	font-size: 150%;
+}
+
+.info {
+	margin: 10px 20px;
+
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+	display: none;
+}
+
+.action-btn {
+	margin-left: 5px;
+	margin-top: 5px;
+	cursor: pointer;
+}
+
 @media only screen and (max-width: 425px) {
 	.cell-container {
 		grid-template-columns: repeat(2, 1fr);
@@ -338,5 +414,22 @@ span {
 		width: 37vw;
 		margin-left: 1em;
 		margin-bottom: 1em;
+	}
+	.cell.narrow {
+		width: 37vw;
+	}
+	.cell-container.narrow {
+		grid-template-columns: repeat(2, 1fr);
+		width: 100%;
+		overflow: hidden;
+	}
+	#totop.narrow {
+		transform: unset;
+		display: none;
+	}
+	#sidebar.slide-in {
+		width: 100vw;
+		border-radius: unset;
+		background-color: rgba(255, 255, 255, 1.0);
 	}
 }
