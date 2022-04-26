@@ -1,4 +1,4 @@
-function sortFiles(li, sort_type, descending = true) {
+export function sortFiles(li, sort_type, descending = true) {
 	function compareFile(a, b) {
 		if (a.props.fileType === "folder" && b.props.fileType !== "folder") {
 			return -1;
@@ -35,5 +35,3 @@ function sortFiles(li, sort_type, descending = true) {
 	li_cp.sort(compareFile);
 	return li_cp;
 }
-
-export { sortFiles };

@@ -63,7 +63,7 @@ function File({name, time, fileType, thumb, onClick}) {
 	);
 }
 
-function Files(props) {
+export function Files(props) {
 	const [data, setData] = useState(false);
 	const [fileSort, setFileSort] = useState({by: "time", descending: true});
 	useEffect(() => {
@@ -197,7 +197,7 @@ function uploadFile(file) {
 	sendFilePart();
 }
 
-function FileUploader () {
+export function FileUploader () {
 		const [selected_file, setSelectedFile] = useState(null);
 		useEffect(() => {
 			uploadFile(selected_file);
@@ -223,5 +223,3 @@ function FileUploader () {
 			</>
 		);
 };
-
-export { Files, FileUploader }

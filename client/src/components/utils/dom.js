@@ -1,26 +1,26 @@
-function uploadProgressHandler(e, sent, size) {
+export function uploadProgressHandler(e, sent, size) {
 	const progress_bar = document.getElementById('progress-bar');
 	const sent_sum = e.loaded + sent;
 	const progress_percent = (sent_sum >= size) ? 100 : (sent_sum / size * 100);
 	progress_bar.style.width = `${progress_percent}%`;
 }
 
-function clearProgressBar(delay = 0) {
+export function clearProgressBar(delay = 0) {
 	enableUploadBtn();
 	setProgressBarColor('green', delay);
 }
 
-function disableUploadBtn() {
+export function disableUploadBtn() {
 	const upload_btn = document.getElementById('upload-btn');
 	upload_btn.setAttribute('onclick', '');
 }
 
-function enableUploadBtn() {
+export function enableUploadBtn() {
 	const upload_btn = document.getElementById('upload-btn');
 	upload_btn.setAttribute('onclick', `document.getElementById('file-upload').click()`);
 }
 
-function setProgressBarColor(color, duration = 0) {
+export function setProgressBarColor(color, duration = 0) {
 	let r, g, b;
 	switch (color) {
 		case 'green':
@@ -58,12 +58,12 @@ function setProgressBarColor(color, duration = 0) {
 	}, duration + 700);
 }
 
-function setFullProgressBar() {
+export function setFullProgressBar() {
 	const progress_bar = document.getElementById('progress-bar');
 	progress_bar.style.width = "100%";
 }
 
-function toggleMessageBox(text = "", duration = 2000) {
+export function toggleMessageBox(text = "", duration = 2000) {
 	const message_box = document.getElementById('message-box');
 	message_box.innerText = text;
 	message_box.classList.add('slide-in');
@@ -72,7 +72,7 @@ function toggleMessageBox(text = "", duration = 2000) {
 	}, duration);
 }
 
-function imgLoadErrorFallback(e, file_type) {
+export function imgLoadErrorFallback(e, file_type) {
 	const img = e.target;
 	let icon_src;
 	switch (file_type) {
@@ -88,7 +88,7 @@ function imgLoadErrorFallback(e, file_type) {
 	img.src = icon_src;
 }
 
-function toggleSortPanel(props) {
+export function toggleSortPanel(props) {
 	const directory_panel = document.getElementById('directory-panel');
 	let sort_panel = document.getElementById('sort-panel');
 	if (!sort_panel) {
@@ -157,10 +157,8 @@ function setOptionSelected(name, props) {
 	toggleSortPanel(props);
 }
 
-function sortDirectionSelector(props) {
+export function sortDirectionSelector(props) {
 	const sort_direction = document.getElementById('sort-direction');
 	sort_direction.classList.toggle('reverse-z');
 	props.setFileSort({by: props.fileSort.by, descending: !props.fileSort.descending});
 };
-
-export { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector };
