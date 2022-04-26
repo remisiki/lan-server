@@ -88,4 +88,79 @@ function imgLoadErrorFallback(e, file_type) {
 	img.src = icon_src;
 }
 
-export { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback };
+function toggleSortPanel(props) {
+	const directory_panel = document.getElementById('directory-panel');
+	let sort_panel = document.getElementById('sort-panel');
+	if (!sort_panel) {
+		sort_panel = document.createElement('div');
+		sort_panel.id = 'sort-panel';
+		sort_panel.classList.add('float');
+
+		const sort_options = ['time', 'name', 'type'];
+		for (const option of sort_options) {
+			const sort_option = createSortOption(option, props);
+			sort_panel.appendChild(sort_option);
+		}
+
+		directory_panel.appendChild(sort_panel);
+
+		setTimeout(() => {
+			sort_panel.classList.add('slide-in');
+		}, 0);
+	}
+	else {
+		sort_panel.classList.remove('slide-in');
+		setTimeout(() => {
+			directory_panel.removeChild(sort_panel);
+		}, 200);
+	}
+}
+
+function createSortOption(name, props) {
+	const option_container = document.createElement('div');
+	const before_option = document.createElement('div');
+	const sort_option = document.createElement('div');
+
+	option_container.classList.add('option-container');
+	before_option.classList.add('before-option');
+	if (name === props.fileSort.by) {
+		before_option.style.backgroundImage = 'url(/assets/select.svg)';
+	}
+
+	sort_option.innerText = `Sort by ${name}`;
+	sort_option.classList.add('option');
+
+	option_container.id = `sort-by-${name}`;
+	option_container.appendChild(before_option);
+	option_container.appendChild(sort_option);
+	option_container.addEventListener('click', () => {
+		setOptionSelected(name, props);
+	});
+
+	return option_container;
+}
+
+function setOptionSelected(name, props) {
+	const sort_panel = document.getElementById('sort-panel');
+	const sort_selector = document.getElementById('sort-selector');
+	for (const sort_option of sort_panel.childNodes) {
+		const before_option = sort_option.getElementsByClassName('before-option')[0];
+		if (`sort-by-${name}` === sort_option.id) {
+			before_option.style.backgroundImage = 'url(/assets/select.svg)';
+		}
+		else {
+			before_option.style.backgroundImage = '';
+		}
+	}
+	props.setFileSort({by: name, descending: props.fileSort.descending});
+	sort_selector.innerText = `Sort by ${name}`;
+	toggleSortPanel(props);
+}
+
+function sortDirectionSelector(props) {
+	const sort_direction = document.getElementById('sort-direction');
+	sort_direction.classList.toggle('reverse-z');
+	props.setFileSort({by: props.fileSort.by, descending: !props.fileSort.descending});
+};
+
+export { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector };

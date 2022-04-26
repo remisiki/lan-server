@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { get } from './http/request';
 import { timestampToTime } from './utils/time';
-import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback } from './utils/dom';
+import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector } from './utils/dom';
+import { sortFiles } from './utils/sort';
 import axios from 'axios';
 import { MessageBox } from './MessageBox';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -46,7 +47,7 @@ function File({name, time, fileType, thumb, onClick}) {
 			icon_src = '/assets/file.svg';
 	}
 	return (
-		<div className="cell" onClick={onClick}>
+		<div className="cell float" onClick={onClick}>
 			<div className="img-container">
 				<LazyLoadImage
 					src={icon_src}
@@ -64,6 +65,7 @@ function File({name, time, fileType, thumb, onClick}) {
 
 function Files(props) {
 	const [data, setData] = useState(false);
+	const [fileSort, setFileSort] = useState({by: "time", descending: true});
 	useEffect(() => {
 		const url = '/api/v1/file_list';
 		const params = {
@@ -107,18 +109,33 @@ function Files(props) {
 						}}
 					/>);
 			}
-			setData(li);
+			setData(sortFiles(li, fileSort.by, fileSort.descending));
 		}
 		worker();
 	}, [props.path]);
+	useEffect(() => {
+		if (!data) return;
+		setData(sortFiles(data, fileSort.by, fileSort.descending));
+	}, [fileSort]);
+	
+	useEffect(() => {
+		// const sort_selector = document.getElementById('sort-selector');
+		// sort_selector.addEventListener('click', () => props.setSortPanel(true));
+
+	}, [props.sortPanel]);
 	return (
-		<>
+		<div id="directory-panel">
+			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: fileSort, setFileSort: setFileSort})}>
+				Sort by time
+			</div>
+			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: fileSort, setFileSort: setFileSort})}>
+			</div>
 			{data && 
 				<div className="cell-container">
 					{data}
 				</div>
 			}
-		</>
+		</div>
 	);
 }
 
