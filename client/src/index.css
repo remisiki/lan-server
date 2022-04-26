@@ -306,6 +306,28 @@ span {
 	transform: rotateZ(-180deg);
 }
 
+#totop {
+	z-index: 1;
+	position: fixed;
+	right: 1em;
+	bottom: -90px;
+	height: 50px;
+	user-select: none;
+	filter: drop-shadow(2px 2px 2px #333);
+	transition: filter 0.3s ease-in-out, height 0.1s ease-in-out, opacity 0.1s ease-in-out, bottom 0.1s;
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+#totop:hover {
+	filter: drop-shadow(5px 5px 5px #333);
+	opacity: 1;
+}
+
+#totop.slide-in {
+	bottom: 1em;
+}
+
 @media only screen and (max-width: 425px) {
 	.cell-container {
 		grid-template-columns: repeat(2, 1fr);

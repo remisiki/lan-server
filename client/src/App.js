@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavigationBlock } from './components/NavigationBlock';
 import { Files } from './components/Files';
+import { ScrollHandler } from './components/utils/scroll';
 
 function App() {
 	const [path, setPath] = useState('/');
@@ -12,6 +13,7 @@ function App() {
 				{path && <NavigationBlock {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths}}/>}
 			</header>
 			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, sortPanel: sortPanel, setSortPanel: setSortPanel}} />}
+			<ScrollHandler />
 		</div>
 	);
 }
