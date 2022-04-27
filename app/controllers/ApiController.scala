@@ -31,60 +31,19 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			}
 			else if (search != null) {
 				val uriDecoded: String = util.decodeUri(search)
-				val files: List[JsObject] = util
+				val searchResult: List[File] = util
 					.findFilesByName(absolutePath, uriDecoded)
-					.toList.map(x => {
-						val file: File = new File(x.toString())
-						val relativePath: String = util.getRelativePath(file.getAbsolutePath(), this.sharePath)
-						val fileName: String = file.getName()
-						val fileType: String = util.getFileType(fileName)
-						Json.obj(
-							"name" -> fileName,
-							"time" -> file.lastModified,
-							"fileType" -> fileType,
-							"size" -> file.length,
-							"thumb" -> {
-								if (util.fileHasThumb(fileType))
-									util.encodeBase64(file.getAbsolutePath())
-								else
-									false
-							},
-							"path" -> util.encodeUri(relativePath)
-						)
-					})
-				val jsonData: JsObject = Json.obj("empty" -> files.isEmpty, "files" -> files)
+					.toList
+					.map(x => new File(x.toString()))
+				val jsonData: JsObject = this.parseFileInfo(searchResult)
 				Ok(jsonData)
 			}
 			else {
 				val directory: File = new File(absolutePath)
 				val imagePath: String = Paths.get(absolutePath, "public").normalize().toString()
 				if (directory.exists && directory.isDirectory) {
-					val allItems: Array[File] = directory.listFiles
-					val folders: List[JsObject] = allItems.filter(_.isDirectory).toList.map(x => 
-						Json.obj(
-							"name" -> x.getName(),
-							"time" -> x.lastModified
-						)
-					)
-					val files: List[JsObject] = allItems.filter(_.isFile).toList.map(x => {
-						val fileName: String = x.getName()
-						val fileType: String = util.getFileType(fileName)
-						val relativePath: String = util.getRelativePath(x.getAbsolutePath(), this.sharePath)
-						Json.obj(
-							"name" -> fileName,
-							"time" -> x.lastModified,
-							"fileType" -> fileType,
-							"size" -> x.length,
-							"thumb" -> {
-								if (util.fileHasThumb(fileType))
-									util.encodeBase64(x.getAbsolutePath())
-								else
-									false
-							},
-							"path" -> util.encodeUri(relativePath)
-						)
-					})
-					val jsonData: JsObject = Json.obj("empty" -> (folders.isEmpty && files.isEmpty), "folders" -> folders, "files" -> files)
+					val fileList: Array[File] = directory.listFiles
+					val jsonData: JsObject = this.parseFileInfo(fileList)
 					Ok(jsonData)
 				} else {
 					Ok(Json.obj({"empty" -> true}))
@@ -111,5 +70,57 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 				)
 			}
 		}
+	}
+
+	private def parseFolder(x: File): JsObject = {
+		Json.obj(
+			"name" -> x.getName(),
+			"time" -> x.lastModified
+		)
+	}
+
+	private def parseFile(x: File): JsObject = {
+		val file: File = new File(x.toString())
+		val relativePath: String = util.getRelativePath(file.getAbsolutePath(), this.sharePath)
+		val fileName: String = file.getName()
+		val fileType: String = util.getFileType(fileName)
+		Json.obj(
+			"name" -> fileName,
+			"time" -> file.lastModified,
+			"fileType" -> fileType,
+			"size" -> file.length,
+			"thumb" -> {
+				if (util.fileHasThumb(fileType))
+					util.encodeBase64(file.getAbsolutePath())
+				else
+					false
+			},
+			"path" -> util.encodeUri(relativePath)
+		)
+	}
+
+	def parseFileInfo(resultList: List[File]): JsObject = {
+		val folders: List[JsObject] = resultList
+			.filter(_.isDirectory)
+			.toList
+			.map(this.parseFolder)
+		val files: List[JsObject] = resultList
+			.filter(_.isFile)
+			.map(this.parseFile)
+		val jsonData: JsObject = Json.obj("empty" -> (files.isEmpty && folders.isEmpty), "folders" -> folders, "files" -> files)
+		jsonData
+	}
+
+	def parseFileInfo(resultList: Array[File]): JsObject = {
+		val folders: List[JsObject] = resultList
+			.filter(_.isDirectory)
+			.toList
+			.map(this.parseFolder)
+		val files: List[JsObject] = resultList
+			.filter(_.isFile)
+			.toList
+			.map(this.parseFile)
+		val jsonData: JsObject = Json.obj("empty" -> (files.isEmpty && folders.isEmpty), "folders" -> folders, "files" -> files)
+		jsonData
 	}
 }
