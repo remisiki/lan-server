@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { get } from './http/request';
-import { timeFormat } from './utils/format';
-import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar, setFileSelected, getIconOfFileType, hideSearchBox } from './utils/dom';
-import { sortFiles } from './utils/sort';
-import axios from 'axios';
-import { MessageBox } from './MessageBox';
+import { imgLoadErrorFallback, getIconOfFileType } from './utils/util';
+import { createSideBar, hideSideBar } from './SideBar';
+import { hideSearchBox } from './SearchBox';
+import { toggleSortPanel, sortDirectionSelector, sortFiles } from './SortPanel';
+
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
@@ -66,91 +66,6 @@ export function Files(props) {
 	);
 }
 
-function uploadFile(file) {
-	if (!file) return;
-	clearProgressBar();
-	disableUploadBtn();
-	const name = window.btoa(encodeURIComponent(file.name));
-	const size = file.size;
-	const interval = (8 << 20);
-	const sendFilePart = async () => {
-		let sent = 0;
-		let retry = 0;
-		const config = {
-			headers: {
-				'Content-Type':'multipart/form-data',
-				// 'Authorization': 'Bearer ' + this.token,
-			},
-			onUploadProgress: (progressEvent) => uploadProgressHandler(progressEvent, sent, size)
-		}
-		while (sent < size) {
-			const form_data = new FormData();
-			const next = (sent + interval > size) ? (size + 1) : (sent + interval);
-			const done = (next > size);
-			const file_part = file.slice(sent, next);
-			form_data.append("name", name);
-			form_data.append("file", file_part);
-			form_data.append("done", done);
-			await axios
-				.post('/', form_data, config)
-				.then((res) => {
-					if (res.data.error) {
-						if (retry > 3) {
-							toggleMessageBox("Failed", 5000);
-							setFullProgressBar();
-							setProgressBarColor('red', 5000);
-							console.error(`All ${retry} retry fail, abort.`);
-							sent = size;
-							return;
-						}
-						retry ++;
-						console.error(`Slice ${sent} error, retry ${retry} times...`);
-						return;
-					}
-					sent = next;
-					retry = 0;
-					if (done) {
-						toggleMessageBox("Success", 2000);
-						clearProgressBar(300);
-					}
-				})
-				.catch((err) => {
-					toggleMessageBox("Failed", 5000);
-					setFullProgressBar();
-					setProgressBarColor('red', 5000);
-				});
-		}
-	};
-	sendFilePart();
-}
-
-export function FileUploader () {
-		const [selected_file, setSelectedFile] = useState(null);
-		useEffect(() => {
-			uploadFile(selected_file);
-		}, [selected_file]);
-		useEffect(enableUploadBtn, []);
-		const handleFileInput = (e) => {
-			const file = e.target.files[0];
-			if (!file) return;
-			if (file.size > (1 << 30)) {
-				alert("File size cannot exceed more than 1 GB.");
-			}
-			else {
-				setSelectedFile(file);
-			}
-		}
-
-		return (
-			<>
-				<MessageBox text="" />
-				<div className="title-right" id="upload-btn" style={{content: "url(/assets/upload.svg)"}}>
-					<input id="file-upload" type="file" onChange={handleFileInput} style={{display: "none"}} />
-				</div>
-			</>
-		);
-};
-
 export function parseResponseToFiles(response, props) {
 	let li = [];
 	if (response.empty) {
@@ -199,4 +114,49 @@ export function parseResponseToFiles(response, props) {
 		}
 	}
 	return li;
+}
+
+export function showNarrowFilePanel() {
+	const cells = document.getElementsByClassName('cell');
+	const cell_containers = document.getElementsByClassName('cell-container');
+	const top_btn = document.getElementById('totop');
+	for (const cell of cells) {
+		cell.classList.add('narrow');
+	}
+	for (const cell_container of cell_containers) {
+		cell_container.classList.add('narrow');
+	}
+	top_btn.classList.add('narrow');
+}
+
+export function hideNarrowFilePanel() {
+	const cells = document.getElementsByClassName('cell');
+	const cell_containers = document.getElementsByClassName('cell-container');
+	const top_btn = document.getElementById('totop');
+	for (const cell of cells) {
+		cell.classList.remove('narrow');
+	}
+	for (const cell_container of cell_containers) {
+		cell_container.classList.remove('narrow');
+	}
+	top_btn.classList.remove('narrow');
+}
+
+export function setFileSelected(e) {
+	const files = e.currentTarget.parentNode.children;
+	for (const file of files) {
+		if (file === e.currentTarget) {
+			file.classList.add('selected');
+		}
+		else {
+			file.classList.remove('selected');
+		}
+	}
+}
+
+export function clearFileSelected() {
+	const selected_files = document.querySelectorAll('.cell.selected');
+	for (const file of selected_files) {
+		file.classList.remove('selected');
+	}
 }

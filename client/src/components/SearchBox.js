@@ -1,6 +1,6 @@
 import { get } from './http/request';
-import { createSideBar, setFileSelected, hideSideBar } from './utils/dom';
-import { sortFiles } from './utils/sort';
+import { createSideBar, hideSideBar } from './SideBar';
+import { sortFiles } from './SortPanel';
 import { parseResponseToFiles } from './Files';
 
 async function searchHandler(e, props) {
@@ -31,4 +31,29 @@ export function SearchBox(props) {
 			/>
 		</div>
 	);
+}
+
+export function hideSearchBox() {
+	const search_box_wrapper = document.getElementById('search-box-wrapper');
+	const search_box = document.getElementById('search-box');
+	const search_btn = document.getElementById('search-btn');
+	search_box_wrapper.classList.remove('slide-in');
+	search_btn.style.content = 'url(/assets/search.svg)';
+	search_btn.classList.remove('no-hover');
+}
+
+export function toggleSearchBox() {
+	const search_btn = document.getElementById('search-btn');
+	const search_box_wrapper = document.getElementById('search-box-wrapper');
+	const search_box = document.getElementById('search-box');
+
+	if (!search_box_wrapper.classList.contains('slide-in')) {
+		search_box_wrapper.classList.add('slide-in');
+		search_box.focus();
+		search_btn.style.content = 'url(/assets/search-black.svg)';
+		search_btn.classList.add('no-hover');
+	}
+	else {
+		hideSearchBox();
+	}
 }

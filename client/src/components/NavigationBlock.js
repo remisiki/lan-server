@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { FileUploader, parseResponseToFiles } from './Files';
-import { hideSideBar, toggleSearchBox, hideSearchBox } from './utils/dom';
-import { SearchBox } from './SearchBox';
+import React, { useState, useEffect } from 'react';
+import { parseResponseToFiles } from './Files';
+import { Uploader } from './Uploader';
+import { hideSideBar } from './SideBar';
+import { SearchBox, toggleSearchBox, hideSearchBox } from './SearchBox';
 import { fetchHomeData } from './http/request';
-import { sortFiles } from './utils/sort';
+import { sortFiles } from './SortPanel';
 
 export function NavigationBlock(props) {
 	const backActionHandler = async () => {
@@ -25,6 +26,9 @@ export function NavigationBlock(props) {
 		}
 	};
 	const homeActionHandler = async () => {
+		if (document.getElementById('sidebar')) {
+			hideSideBar();
+		}
 		if (props.path === '/') {
 			hideSearchBox();
 			const response = await fetchHomeData();
@@ -44,7 +48,7 @@ export function NavigationBlock(props) {
 			<div className="right-action-container">
 				<div className="title-right" id="search-btn" onClick={toggleSearchBox} style={{content: "url(/assets/search.svg)"}}></div>
 				<div className="title-right" id="home-btn" onClick={homeActionHandler} style={{content: "url(/assets/home.svg)"}}></div>
-				<FileUploader />
+				<Uploader />
 			</div>
 			<div id="progress-bar"></div>
 		</div>
