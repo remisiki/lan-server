@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { get } from './http/request';
 import { imgLoadErrorFallback, getIconOfFileType } from './utils/util';
 import { createSideBar, hideSideBar } from './SideBar';
 import { hideSearchBox } from './SearchBox';
 import { toggleSortPanel, sortDirectionSelector, sortFiles } from './SortPanel';
+import { fetchData } from './http/request';
 
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -29,33 +29,21 @@ export function Files(props) {
 	useEffect(() => {
 		hideSideBar();
 		hideSearchBox();
-		const url = '/api/v1/file_list';
-		const params = {
-			path: props.path
-		};
-		const worker = async () => {
-			const response = await get(url, params);
-			const li = parseResponseToFiles(response, props);
-			props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
-		}
-		worker();
+		setPathDisplay(props.path);
+		refreshPage(props);
 	}, [props.path]);
 	useEffect(() => {
 		if (!props.data) return;
 		props.setData(sortFiles(props.data, props.fileSort.by, props.fileSort.descending));
 	}, [props.fileSort]);
-	
-	useEffect(() => {
-		// const sort_selector = document.getElementById('sort-selector');
-		// sort_selector.addEventListener('click', () => props.setSortPanel(true));
-
-	}, [props.sortPanel]);
 	return (
 		<div id="directory-panel">
 			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: props.fileSort, setFileSort: props.setFileSort})}>
 				Sort by time
 			</div>
-			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})}>
+			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})} />
+			<div id="right-control-panel">
+				<img id="refresh-btn" src="/assets/refresh.svg" onClick={() => refreshPage(props)} />
 			</div>
 			{props.data && 
 				<div className="cell-container">
@@ -107,7 +95,7 @@ export function parseResponseToFiles(response, props) {
 					fileType={file.fileType}
 					thumb={thumb}
 					onClick={(e) => {
-						createSideBar(file, downloadAction);
+						createSideBar(file, downloadAction, props);
 						setFileSelected(e);
 					}}
 				/>);
@@ -120,6 +108,7 @@ export function showNarrowFilePanel() {
 	const cells = document.getElementsByClassName('cell');
 	const cell_containers = document.getElementsByClassName('cell-container');
 	const top_btn = document.getElementById('totop');
+	const right_control_panel = document.getElementById('right-control-panel');
 	for (const cell of cells) {
 		cell.classList.add('narrow');
 	}
@@ -127,12 +116,14 @@ export function showNarrowFilePanel() {
 		cell_container.classList.add('narrow');
 	}
 	top_btn.classList.add('narrow');
+	right_control_panel.classList.add('narrow');
 }
 
 export function hideNarrowFilePanel() {
 	const cells = document.getElementsByClassName('cell');
 	const cell_containers = document.getElementsByClassName('cell-container');
 	const top_btn = document.getElementById('totop');
+	const right_control_panel = document.getElementById('right-control-panel');
 	for (const cell of cells) {
 		cell.classList.remove('narrow');
 	}
@@ -140,6 +131,7 @@ export function hideNarrowFilePanel() {
 		cell_container.classList.remove('narrow');
 	}
 	top_btn.classList.remove('narrow');
+	right_control_panel.classList.remove('narrow');
 }
 
 export function setFileSelected(e) {
@@ -159,4 +151,21 @@ export function clearFileSelected() {
 	for (const file of selected_files) {
 		file.classList.remove('selected');
 	}
+}
+
+async function refreshPage(props) {
+	const response = await fetchData(props.path);
+	const li = parseResponseToFiles(response, props);
+	props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
+}
+
+function setPathDisplay(path) {
+	let folder_name = path.slice(0, -1);
+	if (folder_name) {
+		folder_name = folder_name.slice(folder_name.lastIndexOf('/') + 1, folder_name.length);
+	}
+	else {
+		folder_name = 'share';
+	}
+	document.getElementById('current-folder').innerText = folder_name;
 }

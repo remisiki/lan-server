@@ -8,13 +8,12 @@ function App() {
 	const [paths, setPaths] = useState(['/']);
 	const [data, setData] = useState(false);
 	const [fileSort, setFileSort] = useState({by: "time", descending: true});
-	const [sortPanel, setSortPanel] = useState(false);
 	return (
-		<div onClick={() => setSortPanel(false)}>
+		<div>
 			<header>
 				{path && <NavigationBlock {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort}}/>}
 			</header>
-			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, sortPanel: sortPanel, setSortPanel: setSortPanel, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort}} />}
+			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort}} />}
 			<ScrollHandler />
 		</div>
 	);

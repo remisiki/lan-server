@@ -22,7 +22,7 @@ function createSideOption(name, icon, onClick) {
 	return option_container;
 }
 
-export function createSideBar(file, downloadAction) {
+export function createSideBar(file, downloadAction, props) {
 	showNarrowFilePanel();
 	const sidebar_exist = document.getElementById('sidebar');
 	if (sidebar_exist) {
@@ -38,6 +38,8 @@ export function createSideBar(file, downloadAction) {
 	const time = document.createElement('div');
 	const size = document.createElement('div');
 	const path = document.createElement('div');
+	const path_before = document.createElement('span');
+	const path_content = document.createElement('span');
 	const close_btn = document.createElement('img');
 
 	close_btn.src = '/assets/close.svg';
@@ -62,8 +64,21 @@ export function createSideBar(file, downloadAction) {
 	size.innerText = `Size: ${sizeFormat(file.size)}`;
 	size.classList.add('info');
 
-	path.innerText = `Path: /${decodeURIComponent(file.path)}`;
+	const relative_path = `/${decodeURIComponent(file.path)}`;
+	path_content.innerText = relative_path;
+	path_content.classList.add('link-text');
+	path_content.addEventListener('click', () => {
+		if (props.path !== relative_path) {
+			let paths_copy = props.paths;
+			paths_copy.unshift(relative_path);
+			props.setPaths(paths_copy);
+			props.setPath(relative_path);
+		}
+	})
+	path_before.innerText = 'Path: ';
 	path.classList.add('info');
+	path.appendChild(path_before);
+	path.appendChild(path_content);
 
 	sidebar.appendChild(close_btn);
 	sidebar.appendChild(thumb);

@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { parseResponseToFiles } from './Files';
 import { Uploader } from './Uploader';
 import { hideSideBar } from './SideBar';
@@ -43,8 +42,10 @@ export function NavigationBlock(props) {
 		<div className="wrapper nav-block">
 			<div className="left-container">
 				<div className="title-left" id="back-btn" onClick={backActionHandler} style={{content: "url(/assets/back.svg)"}}></div>
+				<div className="title-left" id="current-folder">
+				</div>
 			</div>
-			<SearchBox {...{path: props.path, setData: props.setData, fileSort: props.fileSort}} />
+			<SearchBox {...props} />
 			<div className="right-action-container">
 				<div className="title-right" id="search-btn" onClick={toggleSearchBox} style={{content: "url(/assets/search.svg)"}}></div>
 				<div className="title-right" id="home-btn" onClick={homeActionHandler} style={{content: "url(/assets/home.svg)"}}></div>

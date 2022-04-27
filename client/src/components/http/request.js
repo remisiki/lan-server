@@ -23,9 +23,14 @@ export async function get(url, params) {
 }
 
 export async function fetchHomeData() {
+	const response = await fetchData('/');
+	return response;
+}
+
+export async function fetchData(path) {
 	const url = '/api/v1/file_list';
 	const params = {
-		path: '/'
+		path: path
 	};
 	const response = await get(url, params);
 	return response;

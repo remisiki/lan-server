@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { MessageBox, toggleMessageBox } from './MessageBox';
-import { setSelectedFile } from './Files';
 import axios from 'axios';
 
 export function Uploader () {
