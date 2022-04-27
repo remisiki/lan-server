@@ -21,3 +21,12 @@ export async function get(url, params) {
 	const res = await getHelper(url, config);
 	return res;
 }
+
+export async function fetchHomeData() {
+	const url = '/api/v1/file_list';
+	const params = {
+		path: '/'
+	};
+	const response = await get(url, params);
+	return response;
+}

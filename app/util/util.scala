@@ -3,10 +3,11 @@ package util
 import java.security.MessageDigest
 import java.math.BigInteger
 import java.io.File
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Path, Paths, Files}
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 import java.net.{URLEncoder, URLDecoder}
+import java.util.stream.Stream;
 import scala.util.matching.Regex
 import net.coobird.thumbnailator.Thumbnails
 
@@ -147,7 +148,7 @@ package object util {
 	def decodeBase64(base64: String): String = {
 		val base64Decoded: Array[Byte] = Base64.getDecoder().decode(base64)
 		val strDecoded: String = new String(base64Decoded, StandardCharsets.UTF_8)
-		URLDecoder.decode(strDecoded, StandardCharsets.UTF_8)
+		decodeUri(strDecoded)
 	}
 
 	def encodeBase64(s: String): String = {
@@ -158,6 +159,10 @@ package object util {
 
 	def encodeUri(uri: String): String = {
 		URLEncoder.encode(uri, StandardCharsets.UTF_8).replace("+", "%20")
+	}
+
+	def decodeUri(str: String): String = {
+		URLDecoder.decode(str, StandardCharsets.UTF_8)
 	}
 
 	def screenshotVideo(file: File, cacheFilePath: String): Boolean = {
@@ -192,5 +197,35 @@ package object util {
 				Files.write(Paths.get(s"C:/Users/dell/Downloads/a.${mimeType}"), imageData)
 			}
 		}
+	}
+
+	def findFilesByName(path: String, fileName: String): Array[Object] = {
+		var result: Array[Object] = Array.empty;
+		try {
+			val pathStream: Stream[Path] = Files.find(
+				Paths.get(path),
+				Integer.MAX_VALUE,
+				(p, _) => {
+					p
+						.getFileName()
+						.toString()
+						.toLowerCase()
+						.contains(fileName.toLowerCase())
+				}
+			)
+			result = pathStream.toArray()
+		} catch {
+			case _: Exception => ()
+		}
+		result
+	}
+
+	def getRelativePath(path: String, rootPath: String): String = {
+		val fileName: String = (new File(path)).getName()
+		val translatedPath: String = path.replace("\\", "/")
+		val translatedRootPath: String = rootPath.replace("\\", "/")
+		translatedPath
+			.replace(translatedRootPath, "")
+			.replace(fileName, "")
 	}
 }

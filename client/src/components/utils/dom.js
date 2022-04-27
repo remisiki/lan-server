@@ -241,12 +241,12 @@ export function createSideBar(file, downloadAction) {
 	const name = document.createElement('div');
 	const time = document.createElement('div');
 	const size = document.createElement('div');
+	const path = document.createElement('div');
 	const close_btn = document.createElement('img');
 
 	close_btn.src = '/assets/close.svg';
 	close_btn.classList.add('action-btn');
 	close_btn.addEventListener('click', () => {
-		clearFileSelected();
 		hideSideBar();
 	});
 
@@ -266,11 +266,15 @@ export function createSideBar(file, downloadAction) {
 	size.innerText = `Size: ${sizeFormat(file.size)}`;
 	size.classList.add('info');
 
+	path.innerText = `Path: /${decodeURIComponent(file.path)}`;
+	path.classList.add('info');
+
 	sidebar.appendChild(close_btn);
 	sidebar.appendChild(thumb);
 	sidebar.appendChild(name);
 	sidebar.appendChild(size);
 	sidebar.appendChild(time);
+	sidebar.appendChild(path);
 	sidebar.appendChild(createSideOption('Download', '/assets/download.svg', downloadAction));
 	directory_panel.appendChild(sidebar);
 	setTimeout(() => {
@@ -284,6 +288,7 @@ export function hideSideBar() {
 		sidebar.classList.remove('slide-in');
 		setTimeout(() => {
 			sidebar.remove();
+			clearFileSelected();
 			hideNarrowFilePanel();
 		}, 100);
 	}
@@ -331,5 +336,30 @@ export function clearFileSelected() {
 	const selected_files = document.querySelectorAll('.cell.selected');
 	for (const file of selected_files) {
 		file.classList.remove('selected');
+	}
+}
+
+export function hideSearchBox() {
+	const search_box_wrapper = document.getElementById('search-box-wrapper');
+	const search_box = document.getElementById('search-box');
+	const search_btn = document.getElementById('search-btn');
+	search_box_wrapper.classList.remove('slide-in');
+	search_btn.style.content = 'url(/assets/search.svg)';
+	search_btn.classList.remove('no-hover');
+}
+
+export function toggleSearchBox() {
+	const search_btn = document.getElementById('search-btn');
+	const search_box_wrapper = document.getElementById('search-box-wrapper');
+	const search_box = document.getElementById('search-box');
+
+	if (!search_box_wrapper.classList.contains('slide-in')) {
+		search_box_wrapper.classList.add('slide-in');
+		search_box.focus();
+		search_btn.style.content = 'url(/assets/search-black.svg)';
+		search_btn.classList.add('no-hover');
+	}
+	else {
+		hideSearchBox();
 	}
 }

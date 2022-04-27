@@ -6,7 +6,7 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index()
 
-GET     /api/v1/file_list                controllers.ApiController.getFileList(path: String)
+GET     /api/v1/file_list                controllers.ApiController.getFileList(path: String, search: String ?= null)
 GET     /api/v1/thumb                controllers.ApiController.getThumbnail(path: String)
 
 GET     /download/*base64               controllers.DataTransferController.downloadFile(base64: String)

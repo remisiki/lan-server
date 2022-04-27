@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { get } from './http/request';
 import { timeFormat } from './utils/format';
-import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar, setFileSelected } from './utils/dom';
+import { uploadProgressHandler, clearProgressBar, disableUploadBtn, enableUploadBtn, setProgressBarColor, setFullProgressBar, toggleMessageBox, imgLoadErrorFallback, toggleSortPanel, sortDirectionSelector, createSideBar, hideSideBar, setFileSelected, getIconOfFileType, hideSearchBox } from './utils/dom';
 import { sortFiles } from './utils/sort';
 import axios from 'axios';
 import { MessageBox } from './MessageBox';
@@ -9,43 +9,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
 function File({name, time, fileType, thumb, onClick}) {
-	let icon_src;
-	switch (fileType) {
-		case 'folder':
-			icon_src = '/assets/folder.svg';
-			break;
-		case 'image':
-		case 'video':
-			icon_src = `/api/v1/thumb?path=${thumb}`;
-			break;
-		case 'audio':
-			icon_src = '/assets/audio.svg';
-			break;
-		case 'binary':
-			icon_src = '/assets/puzzle.svg';
-			break;
-		case 'pdf':
-			icon_src = '/assets/pdf.svg';
-			break;
-		case 'archieve':
-			icon_src = '/assets/archieve.svg';
-			break;
-		case 'msword':
-			icon_src = '/assets/msword.svg';
-			break;
-		case 'mspowerpoint':
-			icon_src = '/assets/mspowerpoint.svg';
-			break;
-		case 'msexcel':
-			icon_src = '/assets/msexcel.svg';
-			break;
-		case 'code':
-			icon_src = '/assets/code.svg';
-			break;
-		case 'file':
-		default:
-			icon_src = '/assets/file.svg';
-	}
+	const icon_src = getIconOfFileType(fileType, thumb);
 	return (
 		<div className="cell float" onClick={onClick}>
 			<div className="img-container">
@@ -62,64 +26,24 @@ function File({name, time, fileType, thumb, onClick}) {
 }
 
 export function Files(props) {
-	const [data, setData] = useState(false);
-	const [fileSort, setFileSort] = useState({by: "time", descending: true});
 	useEffect(() => {
 		hideSideBar();
+		hideSearchBox();
 		const url = '/api/v1/file_list';
 		const params = {
 			path: props.path
 		};
 		const worker = async () => {
 			const response = await get(url, params);
-			if (response.empty) return;
-			let li = [];
-			for (const folder of response.folders) {
-				const folderOpener = () => {
-					const child = `${props.path}${folder.name}/`;
-					let paths_copy = props.paths;
-					paths_copy.unshift(child);
-					props.setPaths(paths_copy);
-					props.setPath(child);
-				};
-				li.push(
-					<File
-						key={`d-${folder.name}`}
-						name={folder.name}
-						time={folder.time}
-						fileType="folder"
-						onClick={folderOpener}
-					/>);
-			}
-			for (const file of response.files) {
-				const thumb = (file.thumb) ? (file.thumb) : null;
-				const downloadAction = () => {
-					const path = `${props.path}${file.name}`;
-					const base64 = window.btoa(encodeURIComponent(path));
-					const url = `/download/${base64}`;
-					window.open(url, '_blank').focus();
-				};
-				li.push(
-					<File
-						key={`f-${file.name}`}
-						name={file.name}
-						time={file.time}
-						fileType={file.fileType}
-						thumb={thumb}
-						onClick={(e) => {
-							createSideBar(file, downloadAction);
-							setFileSelected(e);
-						}}
-					/>);
-			}
-			setData(sortFiles(li, fileSort.by, fileSort.descending));
+			const li = parseResponseToFiles(response, props);
+			props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
 		}
 		worker();
 	}, [props.path]);
 	useEffect(() => {
-		if (!data) return;
-		setData(sortFiles(data, fileSort.by, fileSort.descending));
-	}, [fileSort]);
+		if (!props.data) return;
+		props.setData(sortFiles(props.data, props.fileSort.by, props.fileSort.descending));
+	}, [props.fileSort]);
 	
 	useEffect(() => {
 		// const sort_selector = document.getElementById('sort-selector');
@@ -128,14 +52,14 @@ export function Files(props) {
 	}, [props.sortPanel]);
 	return (
 		<div id="directory-panel">
-			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: fileSort, setFileSort: setFileSort})}>
+			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: props.fileSort, setFileSort: props.setFileSort})}>
 				Sort by time
 			</div>
-			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: fileSort, setFileSort: setFileSort})}>
+			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})}>
 			</div>
-			{data && 
+			{props.data && 
 				<div className="cell-container">
-					{data}
+					{props.data}
 				</div>
 			}
 		</div>
@@ -226,3 +150,53 @@ export function FileUploader () {
 			</>
 		);
 };
+
+export function parseResponseToFiles(response, props) {
+	let li = [];
+	if (response.empty) {
+		return li;
+	}
+	if (response.folders) {
+		for (const folder of response.folders) {
+			const folderOpener = () => {
+				const child = `${props.path}${folder.name}/`;
+				let paths_copy = props.paths;
+				paths_copy.unshift(child);
+				props.setPaths(paths_copy);
+				props.setPath(child);
+			};
+			li.push(
+				<File
+					key={`d-${folder.name}`}
+					name={folder.name}
+					time={folder.time}
+					fileType="folder"
+					onClick={folderOpener}
+				/>);
+		}
+	}
+	if (response.files) {
+		for (const file of response.files) {
+			const thumb = (file.thumb) ? (file.thumb) : null;
+			const downloadAction = () => {
+				const path = `${props.path}${file.name}`;
+				const base64 = window.btoa(encodeURIComponent(path));
+				const url = `/download/${base64}`;
+				window.open(url, '_blank').focus();
+			};
+			li.push(
+				<File
+					key={`f-${file.name}-${file.path}`}
+					name={file.name}
+					time={file.time}
+					fileType={file.fileType}
+					thumb={thumb}
+					onClick={(e) => {
+						createSideBar(file, downloadAction);
+						setFileSelected(e);
+					}}
+				/>);
+		}
+	}
+	return li;
+}
