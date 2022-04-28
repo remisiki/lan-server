@@ -1,6 +1,7 @@
 package controllers
 
-import util.util
+import util.Codec
+import types.{Media}
 import javax.inject._
 import java.io.File
 import java.nio.file.{Paths, Files}
@@ -30,8 +31,8 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 				)
 			}
 			else if (search != null) {
-				val uriDecoded: String = util.decodeUri(search)
-				val searchResult: List[File] = util
+				val uriDecoded: String = Codec.decodeUri(search)
+				val searchResult: List[File] = types.File
 					.findFilesByName(absolutePath, uriDecoded)
 					.toList
 					.map(x => new File(x.toString()))
@@ -54,10 +55,10 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 
 	def getThumbnail(path: String) = Action {
 		implicit request: Request[AnyContent] => {
-			val filePath: String = util.decodeBase64(path)
+			val filePath: String = Codec.decodeBase64(path)
 			val tmpPath: String = Paths.get(System.getProperty("java.io.tmpdir"), ".com.remisiki.lan.server", "thumnail").toString()
 			Files.createDirectories(Paths.get(tmpPath))
-			val cacheFilePath: String = util.generateThumbnail(filePath, tmpPath)
+			val cacheFilePath: String = Media.generateThumbnail(filePath, tmpPath)
 			val image: File = new File(cacheFilePath)
 			if (!image.exists()) {
 				NotFound("Thumbnail Not Found")
@@ -80,22 +81,21 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 	}
 
 	private def parseFile(x: File): JsObject = {
-		val file: File = new File(x.toString())
-		val relativePath: String = util.getRelativePath(file.getAbsolutePath(), this.sharePath)
-		val fileName: String = file.getName()
-		val fileType: String = util.getFileType(fileName)
+		val relativePath: String = types.File.getRelativePath(x.getAbsolutePath(), this.sharePath)
+		val fileName: String = x.getName()
+		val fileType: String = types.File.getFileType(fileName)
 		Json.obj(
 			"name" -> fileName,
-			"time" -> file.lastModified,
+			"time" -> x.lastModified,
 			"fileType" -> fileType,
-			"size" -> file.length,
+			"size" -> x.length,
 			"thumb" -> {
-				if (util.fileHasThumb(fileType))
-					util.encodeBase64(file.getAbsolutePath())
+				if (types.File.fileHasThumb(fileType))
+					Codec.encodeBase64(x.getAbsolutePath())
 				else
 					false
 			},
-			"path" -> util.encodeUri(relativePath)
+			"path" -> Codec.encodeUri(relativePath)
 		)
 	}
 
