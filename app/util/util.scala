@@ -5,13 +5,12 @@ import java.math.BigInteger
 import java.io.File
 import java.nio.file.{Path, Paths, Files}
 import java.util.Base64
-import java.nio.charset.StandardCharsets
 import java.net.{URLEncoder, URLDecoder}
 import java.util.stream.Stream;
 import scala.util.matching.Regex
 import net.coobird.thumbnailator.Thumbnails
 
-import org.bytedeco.javacv.{FFmpegFrameGrabber, Java2DFrameConverter, Frame}
+// import org.bytedeco.javacv.{FFmpegFrameGrabber, Java2DFrameConverter, Frame}
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 
@@ -64,7 +63,7 @@ package object util {
 		)
 		map
 	}
-	val thumbableType: Array[String] = Array("image", "video")
+	val thumbableType: Array[String] = Array("image")
 
 	def getMessageDigest(s: String): String = {
 		val byteArray: Array[Byte] = s.getBytes("UTF-8")
@@ -92,21 +91,21 @@ package object util {
 						case e: Exception => ""
 					}
 				}
-				case "video" => {
-					val videoCaptured: Boolean = this.screenshotVideo(file, cacheFilePath)
-					if (!videoCaptured)
-						""
-					else
-						try {
-							Thumbnails.of(cacheFilePath)
-								.size(640, 480)
-								.outputFormat("jpg")
-								.toFile(cacheFilePath)
-							cacheFilePath
-						} catch {
-							case e: Exception => ""
-						}
-				} 
+				// case "video" => {
+				// 	val videoCaptured: Boolean = this.screenshotVideo(file, cacheFilePath)
+				// 	if (!videoCaptured)
+				// 		""
+				// 	else
+				// 		try {
+				// 			Thumbnails.of(cacheFilePath)
+				// 				.size(640, 480)
+				// 				.outputFormat("jpg")
+				// 				.toFile(cacheFilePath)
+				// 			cacheFilePath
+				// 		} catch {
+				// 			case e: Exception => ""
+				// 		}
+				// } 
 				case _ => {
 					""
 				}
@@ -147,43 +146,43 @@ package object util {
 
 	def decodeBase64(base64: String): String = {
 		val base64Decoded: Array[Byte] = Base64.getDecoder().decode(base64)
-		val strDecoded: String = new String(base64Decoded, StandardCharsets.UTF_8)
+		val strDecoded: String = new String(base64Decoded, "UTF-8")
 		decodeUri(strDecoded)
 	}
 
 	def encodeBase64(s: String): String = {
 		val uriEncoded: String = encodeUri(s)
-		val base64ByteString: Array[Byte] = Base64.getEncoder().encode(uriEncoded.getBytes(StandardCharsets.UTF_8))
-		new String(base64ByteString, StandardCharsets.UTF_8)
+		val base64ByteString: Array[Byte] = Base64.getEncoder().encode(uriEncoded.getBytes("UTF-8"))
+		new String(base64ByteString, "UTF-8")
 	}
 
 	def encodeUri(uri: String): String = {
-		URLEncoder.encode(uri, StandardCharsets.UTF_8).replace("+", "%20")
+		URLEncoder.encode(uri, "UTF-8").replace("+", "%20")
 	}
 
 	def decodeUri(str: String): String = {
-		URLDecoder.decode(str, StandardCharsets.UTF_8)
+		URLDecoder.decode(str, "UTF-8")
 	}
 
-	def screenshotVideo(file: File, cacheFilePath: String): Boolean = {
-		try {
-			val frameGrabber: FFmpegFrameGrabber = new FFmpegFrameGrabber(file)
-			frameGrabber.start()
-			val frameLength: Int = frameGrabber.getLengthInFrames()
-			frameGrabber.setFrameNumber(java.lang.Math.round(frameLength * 0.1).toInt)
-			val aa: Java2DFrameConverter = new Java2DFrameConverter()
-			val f: Frame = frameGrabber.grabKeyFrame()
-			val bi: BufferedImage = aa.convert(f)
-			ImageIO.write(bi, "jpg", new File(cacheFilePath))
-			frameGrabber.stop()
-			true
-		} catch {
-			case e: Exception => {
-				println(e)
-				false
-			}
-		}
-	}
+	// def screenshotVideo(file: File, cacheFilePath: String): Boolean = {
+	// 	try {
+	// 		val frameGrabber: FFmpegFrameGrabber = new FFmpegFrameGrabber(file)
+	// 		frameGrabber.start()
+	// 		val frameLength: Int = frameGrabber.getLengthInFrames()
+	// 		frameGrabber.setFrameNumber(java.lang.Math.round(frameLength * 0.1).toInt)
+	// 		val aa: Java2DFrameConverter = new Java2DFrameConverter()
+	// 		val f: Frame = frameGrabber.grabKeyFrame()
+	// 		val bi: BufferedImage = aa.convert(f)
+	// 		ImageIO.write(bi, "jpg", new File(cacheFilePath))
+	// 		frameGrabber.stop()
+	// 		true
+	// 	} catch {
+	// 		case e: Exception => {
+	// 			println(e)
+	// 			false
+	// 		}
+	// 	}
+	// }
 
 	def getAudioMeta() = {
 		val file: Mp3File = new Mp3File("")
