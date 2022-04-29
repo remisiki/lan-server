@@ -35,3 +35,12 @@ export async function fetchData(path) {
 	const response = await get(url, params);
 	return response;
 }
+
+export async function fetchMetaData(path) {
+	const url = '/api/v1/meta';
+	const params = {
+		path: path
+	};
+	const response = await get(url, params);
+	return response;
+}

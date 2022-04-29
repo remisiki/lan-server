@@ -16,9 +16,10 @@ libraryDependencies ++= Seq(
 	"com.typesafe" % "config" % "1.4.2",
 	"net.coobird" % "thumbnailator" % "0.4.17",
 	// "org.bytedeco" % "javacv-platform" % "1.5.7",
-	"com.mpatric" % "mp3agic" % "0.9.1",
+	// "com.mpatric" % "mp3agic" % "0.9.1",
 	"org.jcodec" % "jcodec" % "0.2.5",
 	"org.jcodec" % "jcodec-javase" % "0.2.5",
+	"net.jthink" % "jaudiotagger" % "3.0.1",
 )
 
 // Adds additional packages into Twirl

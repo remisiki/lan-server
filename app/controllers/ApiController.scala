@@ -13,6 +13,7 @@ import play.api.http.HttpEntity
 import akka.util.ByteString
 import com.typesafe.config.{Config, ConfigFactory}
 import akka.stream.scaladsl.{FileIO, Source}
+import types.Audio
 
 @Singleton
 class ApiController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
@@ -59,17 +60,34 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			val tmpPath: String = Paths.get(System.getProperty("java.io.tmpdir"), ".com.remisiki.lan.server", "thumnail").toString()
 			Files.createDirectories(Paths.get(tmpPath))
 			val cacheFilePath: String = Media.generateThumbnail(filePath, tmpPath)
-			val image: File = new File(cacheFilePath)
-			if (!image.exists()) {
+			if (cacheFilePath == null) {
 				NotFound("Thumbnail Not Found")
 			}
 			else {
+				val image: File = new File(cacheFilePath)
 				val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(cacheFilePath))
 				Result(
 					header = ResponseHeader(200, Map()),
 					body = HttpEntity.Streamed(source, Some(image.length()), Some("image/jpeg"))
 				)
 			}
+		}
+	}
+
+	def getMetaData(path: String) = Action {
+		implicit request: Request[AnyContent] => {
+			val filePath: String = Codec.decodeBase64(path)
+			val absolutePath: String = Paths.get(this.sharePath, filePath).normalize().toString()
+			val jsonData: JsObject = types.File.getMetaData(absolutePath)
+			Ok(jsonData)
+		}
+	}
+
+	def test() = Action {
+		implicit request: Request[AnyContent] => {
+			// val audio = new Audio("")
+			// val s = audio.getMetaData()
+			Ok("")
 		}
 	}
 

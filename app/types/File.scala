@@ -1,11 +1,27 @@
 package types
 
+import types.Image
+
 import scala.util.matching.Regex
 import java.nio.file.{Path, Paths, Files}
 import java.util.stream.Stream
+import play.api.libs.json._
 
 class File(path: String) extends java.io.File(path) {
+	private val size: Long = this.length.toLong
+
 	def this(file: java.io.File) = this(file.getAbsolutePath())
+
+	def getSize(): Long = this.size
+
+	def getTime(): Long = this.lastModified
+
+	def getMetaData(): JsObject = {
+		Json.obj(
+			"size" -> this.size,
+			"time" -> this.lastModified
+		)
+	}
 }
 
 object File {
@@ -54,7 +70,7 @@ object File {
 		)
 		map
 	}
-	private val thumbableType: Array[String] = Array("image", "video")
+	private val thumbableType: Array[String] = Array("image", "video", "audio")
 	private val mimeTypes: Map[String, String] = Map(
 	  ".txt" -> "text/plain",
 	  ".html" -> "text/html",
@@ -105,7 +121,7 @@ object File {
 
 	def isAudio(fileName: String): Boolean = {
 		val ext: String = this.getExt(fileName)
-		this.videoExt.contains(ext)
+		this.audioExt.contains(ext)
 	}
 
 	def getFileType(fileName: String): String = {
@@ -150,5 +166,24 @@ object File {
 	def getMimeType(fileName: String): String = {
 		val ext: String = this.getExt(fileName)
 		mimeTypes.getOrElse(ext, "application/octet-stream")
+	}
+
+	def getMetaData(fileName: String): JsObject = {
+		if (this.isImage(fileName)) {
+			val image = new Image(fileName)
+			image.getMetaData()
+		}
+		else if (this.isVideo(fileName)) {
+			val video = new Video(fileName)
+			video.getMetaData()
+		}
+		else if (this.isAudio(fileName)) {
+			val audio = new Audio(fileName)
+			audio.getMetaData()
+		}
+		else {
+			val file = new File(fileName)
+			file.getMetaData()
+		}
 	}
 }

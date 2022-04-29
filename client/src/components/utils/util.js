@@ -8,10 +8,31 @@ export function imgLoadErrorFallback(e, file_type) {
 		case 'video':
 			icon_src = '';
 			break;
+		case 'audio':
+			icon_src = '/assets/audio.svg';
+			break;
 		default:
 			icon_src = '';
 	}
 	img.src = icon_src;
+}
+
+export function defaultImage(file_type) {
+	let icon_src;
+	switch (file_type) {
+		case 'image':
+			icon_src = '/assets/image.svg';
+			break;
+		case 'video':
+			icon_src = '/assets/play.svg';
+			break;
+		case 'audio':
+			icon_src = '/assets/audio.svg';
+			break;
+		default:
+			icon_src = '/assets/file.svg';
+	}
+	return icon_src;
 }
 
 export function getIconOfFileType(file_type, thumb) {
@@ -25,7 +46,7 @@ export function getIconOfFileType(file_type, thumb) {
 			icon_src = `/api/v1/thumb?path=${thumb}`;
 			break;
 		case 'audio':
-			icon_src = '/assets/audio.svg';
+			icon_src = `/api/v1/thumb?path=${thumb}`;
 			break;
 		case 'binary':
 			icon_src = '/assets/puzzle.svg';

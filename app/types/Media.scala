@@ -23,17 +23,24 @@ object Media {
 					if (image.generateThumbnail(cacheFilePath))
 						cacheFilePath
 					else
-						""
+						null
 				}
 				case "video" => {
 					val video = new Video(file)
 					if (video.generateThumbnail(cacheFilePath))
 						cacheFilePath
 					else
-						""
+						null
+				} 
+				case "audio" => {
+					val audio = new Audio(file)
+					if (audio.generateThumbnail(cacheFilePath))
+						cacheFilePath
+					else
+						null
 				} 
 				case _ => {
-					""
+					null
 				}
 			}
 		}

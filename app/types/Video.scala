@@ -15,22 +15,94 @@ import org.jcodec.common.io.NIOUtils
 import org.jcodec.common.DemuxerTrackMeta
 
 class Video(file: File) extends Media(file) {
-	private val grab: FrameGrab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file))
-	private val metaData: DemuxerTrackMeta = grab.getVideoTrack().getMeta()
-	private val frame: Int = metaData.getTotalFrames()
-	private val duration: Double = metaData.getTotalDuration()
+	def this(path: String) = 
+		this(new File(path))
 
-	def getFrame(): Int = this.frame
+	private val grab: Option[FrameGrab] = {
+		try {
+			val _grab: FrameGrab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file))
+			Some(_grab)
+		} catch {
+			case e: Exception => None
+		}
+	}
+	
+	private val metaData: Option[DemuxerTrackMeta] = {
+		this.grab match {
+			case Some(_grab) => {
+				Some(_grab.getVideoTrack().getMeta())
+			}
+			case None => {
+				None
+			} 
+		}
+	}
 
-	def getDuration(): Double = this.duration
+	def getFrame(): Option[Int] = {
+		this.metaData match {
+			case Some(_meta) => {
+				Some(_meta.getTotalFrames())
+			}
+			case None => {
+				None
+			} 
+		}
+	}
 
-	def getFrameRate(): Double = math.rint(this.frame / this.duration * 100) / 100
+	def getDuration(): Option[Double] = {
+		this.metaData match {
+			case Some(_meta) => {
+				Some(_meta.getTotalDuration())
+			}
+			case None => {
+				None
+			} 
+		}
+	}
 
-	def asJson(): JsObject = {
-		Json.obj(
-			"duration" -> this.duration,
-			"rate" -> this.getFrameRate()
-		)
+	def getWidth(): Option[Int] = {
+		this.grab match {
+			case Some(_grab) => {
+				Some(_grab.getMediaInfo().getDim().getWidth())
+			}
+			case None => {
+				None
+			} 
+		}
+	}
+
+	def getHeight(): Option[Int] = {
+		this.grab match {
+			case Some(_grab) => {
+				Some(_grab.getMediaInfo().getDim().getHeight())
+			}
+			case None => {
+				None
+			} 
+		}
+	}
+
+	def getFrameRate(): Option[Double] = {
+		try {
+			Some(math.rint(this.getFrame().get / this.getDuration().get * 100) / 100)
+		} catch {
+			case e: Exception => None
+		}
+	}
+
+	override def getMetaData(): JsObject = {
+		val file: types.File = new types.File(this.file)
+		var jsonData: JsObject = file.getMetaData()
+		if (this.grab != None) {
+			jsonData = jsonData ++ Json.obj(
+				"frame" -> this.getFrame().get,
+				"duration" -> this.getDuration().get,
+				"rate" -> this.getFrameRate().get,
+				"width" -> this.getWidth().get,
+				"height" -> this.getHeight().get
+			)
+		}
+		jsonData
 	}
 
 	def generateKeyFrame(outputPath: String): Boolean = {

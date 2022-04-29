@@ -43,7 +43,14 @@ export function Files(props) {
 			</div>
 			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})} />
 			<div id="right-control-panel">
-				<img id="refresh-btn" src="/assets/refresh.svg" onClick={() => refreshPage(props)} />
+				<img
+					id="refresh-btn"
+					src="/assets/refresh.svg"
+					onClick={() => {
+						hideSideBar();
+						refreshPage(props);
+					}}
+				/>
 			</div>
 			{props.data && 
 				<div className="cell-container">

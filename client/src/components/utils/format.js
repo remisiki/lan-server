@@ -24,3 +24,16 @@ export function sizeFormat(size) {
 	}
 	return `${(x * 1024).toFixed(1)} ${unit[multiplier]}`;
 }
+
+export function durationFormat(duration) {
+	let x = Math.round(duration);
+	let duration_str = `${x % 60}`;
+	while (x / 60 >= 1) {
+		x = Math.floor(x / 60);
+		duration_str = `${x}:${duration_str}`;
+	}
+	if (duration_str.indexOf(':') < 0) {
+		duration_str += 's';
+	}
+	return duration_str;
+}

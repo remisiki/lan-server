@@ -22,8 +22,8 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
   def downloadFile(base64: String) = Action {
     implicit request: Request[AnyContent] => {
       val uriDecoded: String = Codec.decodeBase64(base64)
-      val absolutePath: String = Paths.get(sharePath, uriDecoded).normalize().toString()
-      val topPath: String = Paths.get(sharePath).normalize().toString()
+      val absolutePath: String = Paths.get(this.sharePath, uriDecoded).normalize().toString()
+      val topPath: String = Paths.get(this.sharePath).normalize().toString()
       if (!absolutePath.startsWith(topPath)) {
         Result(
           header = ResponseHeader(403, Map.empty),
@@ -55,7 +55,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
         val uploadDone: Boolean = (formData.dataParts.getOrElse("done", Seq("true"))(0) == "true")
         val base64: String = formData.dataParts.getOrElse("name", Seq("TmV3JTIwRmlsZQ=="))(0)
         val fileName: String = Codec.decodeBase64(base64)
-        var publicPath: String = s"${sharePath}public/"
+        var publicPath: String = s"${this.sharePath}public/"
         var filePath = s"${publicPath}${fileName}"
         val progressFilePath = s"${publicPath}${fileName}.scupload"
         val file = formData.files(0).ref
