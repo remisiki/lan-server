@@ -85,8 +85,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 
 	def test() = Action {
 		implicit request: Request[AnyContent] => {
-			// val audio = new Audio("")
-			// val s = audio.getMetaData()
+			println(types.File.getMetaData("./app/controllers/ApiController.scala"))
 			Ok("")
 		}
 	}

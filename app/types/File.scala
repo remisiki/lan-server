@@ -1,7 +1,5 @@
 package types
 
-import types.Image
-
 import scala.util.matching.Regex
 import java.nio.file.{Path, Paths, Files}
 import java.util.stream.Stream
@@ -26,7 +24,7 @@ class File(path: String) extends java.io.File(path) {
 
 object File {
 	private val extensionPattern: Regex = "(\\.[^.]+)$".r
-	private val imageExt: Array[String] = Array(".jpe", ".jpeg", ".jpg", ".png", ".bmp", ".gif", ".tiff", ".ico", ".svg")
+	private val imageExt: Array[String] = Array(".jpe", ".jpeg", ".jpg", ".png", ".bmp", ".gif", ".tiff", ".ico", ".svg", ".webp")
 	private val videoExt: Array[String] = Array(".mp4", ".avi", ".flv", ".m4v", ".mkv", ".wmv", ".vob", ".mpg", ".mpeg", ".mpe", ".mov", ".3gp")
 	private val audioExt: Array[String] = Array(".mp3", ".m4a", ".aac", ".flac", ".ogg", ".voc", ".wav", ".wma")
 	private val codeExt: Array[String] = Array(".c", ".cpp", ".h", ".hpp", ".java", ".jar", ".dll", ".so", ".class", ".scala", ".py", ".pyc", ".pyd", ".asm", ".s", ".v", ".sv", ".svh", ".js", ".jsx", ".jsp", ".ts", ".tsx", ".html", ".htm", ".css", ".scss", ".json", ".csv", ".tsv", ".mtx", ".db", ".sql", ".sqlite3", ".bat", ".sh", ".ps1", ".inf", ".ini", ".inl", ".conf", ".xml", ".pas", ".sbl", ".php", ".dat", ".log", ".lock", ".cgi", ".pl", ".asp", ".aspx", ".rss", ".xhtml", ".swift", ".vb", ".bak", ".cfg", ".cab", ".dmp", ".sys", ".cmd", ".cs", ".csx", ".cmake", ".cob", ".clj", ".coffee", ".lisp", ".cu", ".pyx", ".elm", ".erl", ".fs", ".f77", ".go", ".hs", ".hsc", ".ipynb", ".kt", ".lua", ".mak", ".m", ".r", ".rb", ".rs", ".sbt", ".bash", ".tex", ".bib", ".vhdl", ".vue", ".yml", ".yaml", ".md", ".rst")
@@ -124,6 +122,11 @@ object File {
 		this.audioExt.contains(ext)
 	}
 
+	def isCode(fileName: String): Boolean = {
+		val ext: String = this.getExt(fileName)
+		this.codeExt.contains(ext)
+	}
+
 	def getFileType(fileName: String): String = {
 		val ext: String = this.getExt(fileName)
 		this.extensionMap.getOrElse(ext, "file")
@@ -168,6 +171,16 @@ object File {
 		mimeTypes.getOrElse(ext, "application/octet-stream")
 	}
 
+	def getLines(fileName: String): Int = {
+		val file = new java.io.File(fileName)
+		val src = scala.io.Source.fromFile(file)
+		try {
+			src.getLines().size
+		} catch {
+			case e: Exception => -1
+		}
+	}
+
 	def getMetaData(fileName: String): JsObject = {
 		if (this.isImage(fileName)) {
 			val image = new Image(fileName)
@@ -180,6 +193,10 @@ object File {
 		else if (this.isAudio(fileName)) {
 			val audio = new Audio(fileName)
 			audio.getMetaData()
+		}
+		else if (this.isCode(fileName)) {
+			val code = new Code(fileName)
+			code.getMetaData()
 		}
 		else {
 			val file = new File(fileName)

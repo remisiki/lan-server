@@ -87,7 +87,7 @@ class Audio(file: File) extends Media(file) {
 							val tagValue: String = tag.getFirst(value)
 							if (tagValue != "") {
 								jsonData = jsonData + (key -> Json.toJson(tagValue.replace("\u0000", "")))
-								break
+								break()
 							}
 						}
 					}
@@ -96,7 +96,7 @@ class Audio(file: File) extends Media(file) {
 			jsonData
 		}
 		catch {
-			case e: Exception => println(e); jsonData
+			case e: Exception => jsonData
 		}
 	}
 }
