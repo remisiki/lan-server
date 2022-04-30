@@ -30,7 +30,7 @@ export function durationFormat(duration) {
 	let duration_str = `${x % 60}`;
 	while (x / 60 >= 1) {
 		x = Math.floor(x / 60);
-		duration_str = `${x}:${duration_str}`;
+		duration_str = `${completeTime(x)}:${duration_str}`;
 	}
 	if (duration_str.indexOf(':') < 0) {
 		duration_str += 's';

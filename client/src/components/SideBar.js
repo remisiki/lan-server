@@ -54,6 +54,9 @@ async function createMetaInfo(wrapper, path) {
 	if (response.album) {
 		infos.push(createInfo(`Album: ${response.album}`))
 	}
+	if (response.line) {
+		infos.push(createInfo(`Line Count: ${response.line}`))
+	}
 	for (const info of infos) {
 		wrapper.appendChild(info);
 	}
@@ -108,9 +111,9 @@ export function createSideBar(file, downloadAction, props) {
 	)
 
 	const relative_path = `/${decodeURIComponent(file.path)}`;
-	const meta_type = ['image', 'video', 'audio'];
+	const meta_type = ['image', 'video', 'audio', 'code'];
 	if (meta_type.includes(file.fileType)) {
-		const path = window.btoa(`${relative_path}${encodeURIComponent(file.name)}`);
+		const path = window.btoa(encodeURIComponent(`${relative_path}${file.name}`));
 		createMetaInfo(file_meta_info_wrapper, path);
 	}
 
