@@ -1,6 +1,7 @@
 package controllers
 
 import util.Codec
+import user.Admin
 import javax.inject._
 import java.io.{File, FileOutputStream}
 import java.nio.file.{Paths, Files}
@@ -16,19 +17,16 @@ import com.typesafe.config.{Config, ConfigFactory}
 @Singleton
 class DataTransferController @Inject()(val controllerComponents: ControllerComponents)(implicit ec: ExecutionContext) extends BaseController {
 
-  val applicationConf: Config = ConfigFactory.load("application.conf")
-  val sharePath = applicationConf.getString("sharePath")
+  private val applicationConf: Config = ConfigFactory.load("application.conf")
+  private val sharePath = applicationConf.getString("sharePath")
 
   def downloadFile(base64: String) = Action {
     implicit request: Request[AnyContent] => {
+      val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
       val uriDecoded: String = Codec.decodeBase64(base64)
-      val absolutePath: String = Paths.get(this.sharePath, uriDecoded).normalize().toString()
-      val topPath: String = Paths.get(this.sharePath).normalize().toString()
-      if (!absolutePath.startsWith(topPath)) {
-        Result(
-          header = ResponseHeader(403, Map.empty),
-          body = HttpEntity.Strict(ByteString("You do not have the permission to visit this directory."), Some("text/plain"))
-        )
+      val absolutePath: String = Admin.getRealPath(uriDecoded, isAdmin)
+      if (!isAdmin && !types.File.isSharePath(absolutePath)) {
+        Forbidden("")
       }
       else {
         val file: File = new File(absolutePath)

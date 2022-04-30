@@ -8,7 +8,7 @@ function getHelper(url, config) {
 	});
 }
 
-export async function get(url, params) {
+export async function get(url, params = {}) {
 	const headers = {
 		// headers: {
 		//   'Authorization': `Bearer ${decrypted}`
@@ -43,4 +43,10 @@ export async function fetchMetaData(path) {
 	};
 	const response = await get(url, params);
 	return response;
+}
+
+export async function verifyAdmin() {
+	const url = '/api/v1/admin';
+	const response = await get(url);
+	return response.admin;
 }

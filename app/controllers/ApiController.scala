@@ -1,6 +1,7 @@
 package controllers
 
 import util.Codec
+import user.Admin
 import types.{Media}
 import javax.inject._
 import java.io.File
@@ -18,18 +19,34 @@ import types.Audio
 @Singleton
 class ApiController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
 
-	val applicationConf: Config = ConfigFactory.load("application.conf")
-	val sharePath = applicationConf.getString("sharePath")
+	private val applicationConf: Config = ConfigFactory.load("application.conf")
+	private val sharePath = applicationConf.getString("sharePath")
 
 	def getFileList(path: String, search: String) = Action {
 		implicit request: Request[AnyContent] => {
-			val absolutePath: String = Paths.get(this.sharePath, path).normalize().toString()
-			val topPath: String = Paths.get(this.sharePath).normalize().toString()
-			if (!absolutePath.startsWith(topPath)) {
-				Result(
-					header = ResponseHeader(403, Map.empty),
-					body = HttpEntity.Strict(ByteString("You do not have the permission to visit this directory."), Some("text/plain"))
-				)
+			val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
+			val absolutePath: String = Admin.getRealPath(path, isAdmin)
+			if (!isAdmin && !types.File.isSharePath(absolutePath)) {
+				Forbidden("")
+			}
+			else if (isAdmin && path == "/") {
+				val rootPaths: Array[String] = types.File.getRootPath()
+				val jsonData: JsObject = {
+					var folders: Array[JsObject] = Array(
+						Json.obj(
+							"name" -> this.sharePath,
+							"time" -> 0
+						)
+					)
+					for (path <- rootPaths) {
+						folders = folders :+ Json.obj(
+							"name" -> path.replace("\\", ""),
+							"time" -> 0
+						)
+					}
+					Json.obj("empty" -> folders.isEmpty, "folders" -> folders)
+				}
+				Ok(jsonData)
 			}
 			else if (search != null) {
 				val uriDecoded: String = Codec.decodeUri(search)
@@ -37,15 +54,14 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 					.findFilesByName(absolutePath, uriDecoded)
 					.toList
 					.map(x => new File(x.toString()))
-				val jsonData: JsObject = this.parseFileInfo(searchResult)
+				val jsonData: JsObject = this.parseFileInfo(searchResult, isAdmin)
 				Ok(jsonData)
 			}
 			else {
 				val directory: File = new File(absolutePath)
-				val imagePath: String = Paths.get(absolutePath, "public").normalize().toString()
 				if (directory.exists && directory.isDirectory) {
 					val fileList: Array[File] = directory.listFiles
-					val jsonData: JsObject = this.parseFileInfo(fileList)
+					val jsonData: JsObject = this.parseFileInfo(fileList, isAdmin)
 					Ok(jsonData)
 				} else {
 					Ok(Json.obj({"empty" -> true}))
@@ -56,10 +72,18 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 
 	def getThumbnail(path: String) = Action {
 		implicit request: Request[AnyContent] => {
-			val filePath: String = Codec.decodeBase64(path)
+			val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
+			val filePath: String = Admin.getRealPath(Codec.decodeBase64(path), isAdmin)
 			val tmpPath: String = Paths.get(System.getProperty("java.io.tmpdir"), ".com.remisiki.lan.server", "thumnail").toString()
 			Files.createDirectories(Paths.get(tmpPath))
-			val cacheFilePath: String = Media.generateThumbnail(filePath, tmpPath)
+			val cacheFilePath: String = {
+				if (types.File.isParent(tmpPath, filePath)) {
+					filePath
+				}
+				else {
+					Media.generateThumbnail(filePath, tmpPath)
+				}
+			}
 			if (cacheFilePath == null) {
 				NotFound("Thumbnail Not Found")
 			}
@@ -76,16 +100,30 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 
 	def getMetaData(path: String) = Action {
 		implicit request: Request[AnyContent] => {
+			val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
 			val filePath: String = Codec.decodeBase64(path)
-			val absolutePath: String = Paths.get(this.sharePath, filePath).normalize().toString()
+			val absolutePath: String = Admin.getRealPath(filePath, isAdmin)
 			val jsonData: JsObject = types.File.getMetaData(absolutePath)
+			Ok(jsonData)
+		}
+	}
+
+	def checkAdmin() = Action {
+		implicit request: Request[AnyContent] => {
+			val jsonData: JsObject = Json.obj(
+				"admin" -> Admin.verifyCookie(request.cookies)
+			)
 			Ok(jsonData)
 		}
 	}
 
 	def test() = Action {
 		implicit request: Request[AnyContent] => {
-			println(types.File.getMetaData("./app/controllers/ApiController.scala"))
+			// println(types.File.getMetaData("./app/controllers/ApiController.scala"))
+			// Admin.getRootPath().foreach(println)
+			
+			// println(Admin.verifyCookie(request.cookies))
+			types.File.findFilesByName("D:/Scala/lan-share/app", "a.txt").foreach(println)
 			Ok("")
 		}
 	}
@@ -97,8 +135,15 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 		)
 	}
 
-	private def parseFile(x: File): JsObject = {
-		val relativePath: String = types.File.getRelativePath(x.getAbsolutePath(), this.sharePath)
+	private def parseFile(x: File, isAdmin: Boolean): JsObject = {
+		val thumbPath: String = {
+			if (isAdmin) {
+				types.File.translatePath(x.getAbsolutePath())
+			}
+			else {
+				types.File.getRelativePath(x.getAbsolutePath(), this.sharePath)
+			}
+		}
 		val fileName: String = x.getName()
 		val fileType: String = types.File.getFileType(fileName)
 		Json.obj(
@@ -108,27 +153,27 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			"size" -> x.length,
 			"thumb" -> {
 				if (types.File.fileHasThumb(fileType))
-					Codec.encodeBase64(x.getAbsolutePath())
+					Codec.encodeBase64(thumbPath)
 				else
 					false
 			},
-			"path" -> Codec.encodeUri(relativePath)
+			"path" -> Codec.encodeUri(thumbPath.replace(fileName, ""))
 		)
 	}
 
-	def parseFileInfo(resultList: List[File]): JsObject = {
+	def parseFileInfo(resultList: List[File], isAdmin: Boolean): JsObject = {
 		val folders: List[JsObject] = resultList
 			.filter(_.isDirectory)
 			.toList
 			.map(this.parseFolder)
 		val files: List[JsObject] = resultList
 			.filter(_.isFile)
-			.map(this.parseFile)
+			.map(x => this.parseFile(x, isAdmin))
 		val jsonData: JsObject = Json.obj("empty" -> (files.isEmpty && folders.isEmpty), "folders" -> folders, "files" -> files)
 		jsonData
 	}
 
-	def parseFileInfo(resultList: Array[File]): JsObject = {
+	def parseFileInfo(resultList: Array[File], isAdmin: Boolean): JsObject = {
 		val folders: List[JsObject] = resultList
 			.filter(_.isDirectory)
 			.toList
@@ -136,7 +181,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 		val files: List[JsObject] = resultList
 			.filter(_.isFile)
 			.toList
-			.map(this.parseFile)
+			.map(x => this.parseFile(x, isAdmin))
 		val jsonData: JsObject = Json.obj("empty" -> (files.isEmpty && folders.isEmpty), "folders" -> folders, "files" -> files)
 		jsonData
 	}

@@ -9,8 +9,10 @@ export function MessageBox({text}) {
 export function toggleMessageBox(text = "", duration = 2000) {
 	const message_box = document.getElementById('message-box');
 	message_box.innerText = text;
-	message_box.classList.add('slide-in');
-	setTimeout(() => {
-		message_box.classList.remove('slide-in');
-	}, duration);
+	if (!message_box.classList.contains('slide-in')) {
+		message_box.classList.add('slide-in');
+		setTimeout(() => {
+			message_box.classList.remove('slide-in');
+		}, duration);
+	}
 }

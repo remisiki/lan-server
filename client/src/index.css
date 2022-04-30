@@ -186,7 +186,7 @@ img {
 	display: inline-block;
 	opacity: 0;
 	position: fixed;
-	right: 100px;
+	right: 150px;
 	top: 16px;
 	height: 37px;
 	width: 0;
@@ -199,7 +199,7 @@ img {
 
 #search-box-wrapper.slide-in {
 	opacity: 1;
-	width: calc(50% - 60px);
+	width: calc(50% - 100px);
 }
 
 #search-box {
@@ -464,7 +464,7 @@ img {
 #current-folder {
 	cursor: auto;
 	width: fit-content;
-	max-width: calc(100vw - 300px);
+	max-width: calc(100vw - 250px);
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
@@ -483,12 +483,72 @@ img {
 	cursor: pointer;
 }
 
+h1 {
+	font-size: 36px;
+	font-weight: bold;
+	padding: 10px;
+}
+
+h2 {
+	font-size: 24px;
+	padding: 10px;
+}
+
+h3 {
+	font-size: 16px;
+	padding: 10px;
+}
+
+#password-box-wrapper {
+	display: block;
+	position: relative;
+	height: 37px;
+	width: 70%;
+	margin: 10px;
+	padding: 0 10px;
+	border: 2px #708090 solid;
+	border-radius: 20px;
+	overflow: hidden;
+}
+
+#password-box-wrapper:focus-within {
+	background-color: #eee;
+}
+
+#password-box {
+	font-size: 100%;
+	line-height: 2;
+	width: 100%;
+	height: 90%;
+	vertical-align: text-bottom;
+	background-color: rgba(0, 0, 0, 0.0);
+	resize: none;
+	border: none;
+	outline: none;
+	overflow-wrap: normal;
+	white-space: nowrap;
+}
+
+.gray {
+	color: #a0a0a0;
+}
+
+.hide {
+	display: none;
+}
+
 @media only screen and (max-width: 425px) {
 	.wrapper .title-left:hover:not(.title-selected), .title-center:hover:not(.title-selected), .title-right:hover:not(.title-selected) {
 		background-color: rgba(0, 0, 0, 0.0);
 	}
 	.wrapper .title-left:active:not(.title-selected), .title-center:active:not(.title-selected), .title-right:active:not(.title-selected) {
 		background-color: rgba(0, 0, 0, 0.3);
+	}
+	.option-container:hover {
+		background-color: rgba(209, 209, 209, 0.0);
+	}
+	.option-container:active {
+		background-color: rgba(209, 209, 209, 0.8);
 	}
 	.cell-container {
 		grid-template-columns: repeat(2, 1fr);
@@ -517,8 +577,5 @@ img {
 		width: 100vw;
 		border-radius: unset;
 		background-color: rgba(255, 255, 255, 1.0);
-	}
-	#current-folder.hide {
-		display: none;
 	}
 }

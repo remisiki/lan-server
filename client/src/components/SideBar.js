@@ -1,9 +1,11 @@
 import { showNarrowFilePanel, hideNarrowFilePanel, clearFileSelected } from './Files';
 import { getIconOfFileType, defaultImage } from './utils/util';
 import { timeFormat, sizeFormat, durationFormat } from './utils/format';
-import { fetchMetaData } from './http/request';
+import { fetchMetaData, verifyAdmin } from './http/request';
+import { toggleMessageBox } from './MessageBox';
+import md5 from 'js-md5';
 
-function createSideOption(name, icon, onClick) {
+function createSideOption(content, name, icon, onClick) {
 	const option_container = document.createElement('div');
 	const before_option = document.createElement('div');
 	const option = document.createElement('div');
@@ -12,7 +14,7 @@ function createSideOption(name, icon, onClick) {
 	before_option.classList.add('before-option');
 	before_option.style.backgroundImage = `url(${icon})`;
 
-	option.innerText = name;
+	option.innerText = content;
 	option.classList.add('option');
 
 	option_container.id = `side-option-${name}`;
@@ -140,7 +142,114 @@ export function createSideBar(file, downloadAction, props) {
 	}
 	sidebar.appendChild(file_meta_info_wrapper);
 	sidebar.appendChild(path);
-	sidebar.appendChild(createSideOption('Download', '/assets/download.svg', downloadAction));
+	sidebar.appendChild(createSideOption('Download', 'download', '/assets/download.svg', downloadAction));
+	directory_panel.appendChild(sidebar);
+	setTimeout(() => {
+		sidebar.classList.add('slide-in');
+	}, 100);
+}
+
+function loginHandler(e) {
+	if (e.keyCode === 13) {
+		e.preventDefault();
+		login();
+		return false;
+	}
+}
+
+async function login() {
+	const input = document.getElementById('password-box');
+	const log_in_btn = document.getElementById('side-option-login');
+	const password = input.value;
+	if (!password) return;
+	input.disabled = true;
+	input.classList.add('gray');
+	log_in_btn.classList.add('hide');
+	const user_cookie_value = window.btoa(md5(encodeURIComponent(password)));
+	document.cookie = `_user=${user_cookie_value}`;
+	const isAdmin = await verifyAdmin();
+	if (isAdmin) {
+		toggleMessageBox("Welcome!");
+		setTimeout(() => {
+			window.location.reload();
+		}, 2000);
+	}
+	else {
+		toggleMessageBox("Wrong password!");
+		input.disabled = false;
+		input.classList.remove('gray');
+		input.focus();
+		log_in_btn.classList.remove('hide');
+	}
+}
+
+function logout() {
+	const log_out_btn = document.getElementById('side-option-logout');
+	if (log_out_btn) {
+		log_out_btn.remove();
+	}
+	document.cookie = '_user=;Max-Age=0';
+	toggleMessageBox('Logged out');
+	setTimeout(() => {
+		window.location.reload();
+	}, 2000);
+}
+
+function createAdminSetting(isAdmin) {
+	const wrapper = document.createElement('div');
+	const caption_admin = document.createElement('h1');
+	caption_admin.innerText = 'Admin Mode';
+	wrapper.appendChild(caption_admin);
+
+	if (!isAdmin) {
+		const password_wrapper = document.createElement('div');
+		const password = document.createElement('input');
+
+		password_wrapper.id = 'password-box-wrapper';
+		password.id = 'password-box';
+		password.type = 'password';
+		password.placeholder = 'Enter Admin Password';
+		password.addEventListener('keydown', loginHandler);
+		password.classList.add('no-scroll-bar');
+		password_wrapper.appendChild(password);
+
+		wrapper.appendChild(password_wrapper);
+		wrapper.appendChild(createSideOption('Log in', 'login', '/assets/login.svg', login));
+	}
+	else {
+		const text_admin = document.createElement('h3');
+		text_admin.innerText = 'You are logged in as admin.';
+
+		wrapper.appendChild(text_admin);
+		wrapper.appendChild(createSideOption('Log out', 'logout', '/assets/logout.svg', logout));
+	}
+
+	return wrapper;
+}
+
+export function createSettingSideBar(props) {
+	showNarrowFilePanel();
+	const sidebar_exist = document.getElementById('sidebar');
+	if (sidebar_exist) {
+		sidebar_exist.classList.remove('slide-in');
+		setTimeout(() => {
+			sidebar_exist.remove();
+		}, 100);
+	}
+	const sidebar = document.createElement('div');
+	const directory_panel = document.getElementById('directory-panel');
+	const close_btn = document.createElement('img');
+	
+	close_btn.src = '/assets/close.svg';
+	close_btn.classList.add('action-btn');
+	close_btn.addEventListener('click', () => {
+		hideSideBar();
+	});
+
+	sidebar.id = 'sidebar';
+
+	sidebar.appendChild(close_btn);
+	sidebar.appendChild(createAdminSetting(props.admin));
 	directory_panel.appendChild(sidebar);
 	setTimeout(() => {
 		sidebar.classList.add('slide-in');

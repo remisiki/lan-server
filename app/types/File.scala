@@ -4,6 +4,7 @@ import scala.util.matching.Regex
 import java.nio.file.{Path, Paths, Files}
 import java.util.stream.Stream
 import play.api.libs.json._
+import com.typesafe.config.{Config, ConfigFactory}
 
 class File(path: String) extends java.io.File(path) {
 	private val size: Long = this.length.toLong
@@ -103,6 +104,9 @@ object File {
 	  ".tar.gz" -> "application/x-tar"
 	)
 
+	private val applicationConf: Config = ConfigFactory.load("application.conf")
+	private val sharePath = applicationConf.getString("sharePath")
+
 	def getExt(fileName: String): String = {
 		this.extensionPattern.findFirstMatchIn(fileName).getOrElse("").toString().toLowerCase()
 	}
@@ -137,12 +141,13 @@ object File {
 	}
 
 	def findFilesByName(path: String, fileName: String): Array[Object] = {
-		var result: Array[Object] = Array.empty;
+		var result: Array[Object] = Array.empty
 		try {
 			val pathStream: Stream[Path] = Files.find(
 				Paths.get(path),
 				Integer.MAX_VALUE,
 				(p, _) => {
+					this.isParent(path, p.getParent().toString()) &&
 					p
 						.getFileName()
 						.toString()
@@ -155,15 +160,6 @@ object File {
 			case _: Exception => ()
 		}
 		result
-	}
-
-	def getRelativePath(path: String, rootPath: String): String = {
-		val fileName: String = (new File(path)).getName()
-		val translatedPath: String = path.replace("\\", "/")
-		val translatedRootPath: String = rootPath.replace("\\", "/")
-		translatedPath
-			.replace(translatedRootPath, "")
-			.replace(fileName, "")
 	}
 
 	def getMimeType(fileName: String): String = {
@@ -202,5 +198,31 @@ object File {
 			val file = new File(fileName)
 			file.getMetaData()
 		}
+	}
+
+	def translatePath(path: String): String = {
+		path.replace("\\", "/")
+	}
+
+	def getRelativePath(path: String, rootPath: String): String = {
+		val translatedPath: String = this.translatePath(path)
+		val translatedRootPath: String = this.translatePath(rootPath)
+		translatedPath.replace(translatedRootPath, "")
+	}
+
+	def isParent(parentPath: String, childPath: String): Boolean = {
+		val translatedParentPath: String = this.translatePath(parentPath)
+		val translatedChildPath: String = this.translatePath(childPath)
+		translatedChildPath.startsWith(translatedParentPath)
+	}
+
+	def isSharePath(path: String): Boolean = {
+		val translatedPath: String = this.translatePath(path)
+		val translatedRootPath: String = this.translatePath(Paths.get(this.sharePath).normalize().toString())
+		translatedPath.startsWith(translatedRootPath)
+	}
+
+	def getRootPath(): Array[String] = {
+		java.io.File.listRoots().map(_.getAbsolutePath())
 	}
 }

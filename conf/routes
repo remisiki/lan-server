@@ -10,6 +10,7 @@ GET     /test                           controllers.ApiController.test()
 GET     /api/v1/file_list                controllers.ApiController.getFileList(path: String, search: String ?= null)
 GET     /api/v1/thumb                controllers.ApiController.getThumbnail(path: String)
 GET     /api/v1/meta                controllers.ApiController.getMetaData(path: String)
+GET     /api/v1/admin                controllers.ApiController.checkAdmin()
 
 GET     /download/*base64               controllers.DataTransferController.downloadFile(base64: String)
 
