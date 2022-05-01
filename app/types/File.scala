@@ -179,25 +179,30 @@ object File {
 	}
 
 	def getMetaData(fileName: String): JsObject = {
-		if (this.isImage(fileName)) {
-			val image = new Image(fileName)
-			image.getMetaData()
-		}
-		else if (this.isVideo(fileName)) {
-			val video = new Video(fileName)
-			video.getMetaData()
-		}
-		else if (this.isAudio(fileName)) {
-			val audio = new Audio(fileName)
-			audio.getMetaData()
-		}
-		else if (this.isCode(fileName)) {
-			val code = new Code(fileName)
-			code.getMetaData()
+		val file = new File(fileName)
+		if (!(file.exists() && file.isFile())) {
+			Json.obj("error" -> true)
 		}
 		else {
-			val file = new File(fileName)
-			file.getMetaData()
+			if (this.isImage(fileName)) {
+				val image = new Image(fileName)
+				image.getMetaData()
+			}
+			else if (this.isVideo(fileName)) {
+				val video = new Video(fileName)
+				video.getMetaData()
+			}
+			else if (this.isAudio(fileName)) {
+				val audio = new Audio(fileName)
+				audio.getMetaData()
+			}
+			else if (this.isCode(fileName)) {
+				val code = new Code(fileName)
+				code.getMetaData()
+			}
+			else {
+				file.getMetaData()
+			}
 		}
 	}
 

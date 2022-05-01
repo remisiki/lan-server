@@ -12,6 +12,8 @@ class Code(file: java.io.File) extends File(file) {
 			src.getLines().size
 		} catch {
 			case e: Exception => -1
+		} finally {
+			src.close()
 		}
 	}
 

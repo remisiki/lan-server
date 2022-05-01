@@ -60,12 +60,12 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			}
 			else {
 				val directory: File = new File(absolutePath)
-				if (directory.exists && directory.isDirectory) {
+				if (directory.exists() && directory.isDirectory()) {
 					val fileList: Array[File] = directory.listFiles
 					val jsonData: JsObject = this.parseFileInfo(fileList, isAdmin)
 					Ok(jsonData)
 				} else {
-					Ok(Json.obj({"empty" -> true}))
+					NotFound("")
 				}
 			}
 		}
@@ -124,7 +124,8 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			// Admin.getRootPath().foreach(println)
 			
 			// println(Admin.verifyCookie(request.cookies))
-			types.File.findFilesByName("D:/Scala/lan-share/app", "a.txt").foreach(println)
+			// types.File.findFilesByName("D:/Scala/lan-share/app", "a.txt").foreach(println)
+			println(types.File.getMetaData("a.jpg"))
 			Ok("")
 		}
 	}

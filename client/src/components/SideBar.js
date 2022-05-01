@@ -4,6 +4,7 @@ import { timeFormat, sizeFormat, durationFormat } from './utils/format';
 import { fetchMetaData, verifyAdmin } from './http/request';
 import { toggleMessageBox } from './MessageBox';
 import { getThemeMode, setThemeMode, getTheme } from './control/dark';
+import { setFullProgressBar, setProgressBarColor } from './Uploader';
 import md5 from 'js-md5';
 
 function createSideOption(content, name, icon, onClick) {
@@ -36,6 +37,11 @@ function createInfo(content) {
 async function createMetaInfo(wrapper, path) {
 	let infos = [];
 	const response = await fetchMetaData(path);
+	if (response.error) {
+		toggleMessageBox('File or folder may be removed. Please reload!', 5000);
+		setFullProgressBar();
+		setProgressBarColor('red', 5000);
+	}
 	if (response.duration) {
 		infos.push(createInfo(`Length: ${durationFormat(response.duration)}`))
 	}
@@ -127,7 +133,7 @@ export function createSideBar(file, downloadAction, props) {
 	path_content.innerText = relative_path;
 	path_content.classList.add('link-text');
 	path_content.addEventListener('click', () => {
-		if (props.path !== relative_path) {
+		if (props.path !== `/${decodeURIComponent(file.path)}`) {
 			let paths_copy = props.paths;
 			paths_copy.unshift(relative_path);
 			props.setPaths(paths_copy);

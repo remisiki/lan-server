@@ -44,7 +44,6 @@ function translateTheme(mode) {
 
 export function checkThemeMode() {
 	const theme = getTheme();
-	console.log(theme);
 	toggleTheme(theme);
 }
 

@@ -4,7 +4,6 @@ import { createSideBar, hideSideBar } from './SideBar';
 import { hideSearchBox } from './SearchBox';
 import { toggleSortPanel, sortDirectionSelector, sortFiles } from './SortPanel';
 import { fetchData } from './http/request';
-import { checkThemeMode } from './control/dark';
 
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -51,6 +50,7 @@ export function Files(props) {
 						hideSideBar();
 						refreshPage(props);
 					}}
+					alt="reload"
 				/>
 			</div>
 			{props.data && 

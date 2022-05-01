@@ -30,15 +30,20 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
       }
       else {
         val file: File = new File(absolutePath)
-        val uriEncodedFileName: String = Codec.encodeUri(file.getName())
-        val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(absolutePath))
-        val contentType: String = types.File.getMimeType(absolutePath)
-        Result(
-          header = ResponseHeader(200, Map(
-            CONTENT_DISPOSITION -> s"attachment; filename=${uriEncodedFileName}"
-          )),
-          body = HttpEntity.Streamed(source, Some(file.length()), Some(contentType))
-        )
+        if (file.exists() && file.isFile()) {
+          val uriEncodedFileName: String = Codec.encodeUri(file.getName())
+          val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(absolutePath))
+          val contentType: String = types.File.getMimeType(absolutePath)
+          Result(
+            header = ResponseHeader(200, Map(
+              CONTENT_DISPOSITION -> s"attachment; filename=${uriEncodedFileName}"
+            )),
+            body = HttpEntity.Streamed(source, Some(file.length()), Some(contentType))
+          )
+        }
+        else {
+          NotFound("")
+        }
       }
     }
   }

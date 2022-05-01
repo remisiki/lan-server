@@ -4,7 +4,7 @@ function getHelper(url, config) {
 	return new Promise(function (resolve, reject) {
 		axios.get(url, config)
 			.then((response) => { resolve(response.data); })
-			.catch((error) => { reject(error); });
+			.catch((error) => { resolve({error: true}); });
 	});
 }
 
