@@ -4,6 +4,7 @@ import { createSideBar, hideSideBar } from './SideBar';
 import { hideSearchBox } from './SearchBox';
 import { toggleSortPanel, sortDirectionSelector, sortFiles } from './SortPanel';
 import { fetchData } from './http/request';
+import { checkThemeMode } from './control/dark';
 
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -38,10 +39,10 @@ export function Files(props) {
 	}, [props.fileSort]);
 	return (
 		<div id="directory-panel">
-			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: props.fileSort, setFileSort: props.setFileSort})}>
+			<div id="sort-selector" className="float" onClick={() => toggleSortPanel({fileSort: props.fileSort, setFileSort: props.setFileSort, theme: props.theme})}>
 				Sort by time
 			</div>
-			<div id="sort-direction" className="float" style={{'backgroundImage': 'url(/assets/down-arrow.svg)'}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})} />
+			<div id="sort-direction" className="float" style={{'backgroundImage': `url(/assets/down-arrow${(props.theme === 'dark') ? '-white' : ''}.svg)`}} onClick={() => sortDirectionSelector({fileSort: props.fileSort, setFileSort: props.setFileSort})} />
 			<div id="right-control-panel">
 				<img
 					id="refresh-btn"

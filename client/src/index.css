@@ -360,7 +360,7 @@ img {
 	user-select: none;
 }
 
-.option-container:hover {
+.option-container:hover:not(.option-selected) {
 	background-color: rgba(209, 209, 209, 0.8);
 }
 
@@ -542,6 +542,65 @@ h3 {
 	display: none;
 }
 
+.dark-content {
+	background-color: rgba(48, 56, 65, 1.0);
+	color: #eee;
+}
+
+.dark-content .float {
+	background-color: rgba(48, 56, 65, 1.0);
+	color: #eee;
+}
+
+body.dark-content {
+	background-color: #22272e;
+}
+
+.dark-content .cell.selected {
+	background-color: #708090;
+}
+
+.dark-content #sidebar {
+	background-color: #708090;
+}
+
+.dark-content .cell.selected span {
+	color: #333;
+}
+
+.dark-content .float:hover {
+	background-color: #708090;
+}
+
+.dark-content .link-text {
+	color: #0de1bd;
+	background-color: unset;
+}
+
+.dark-content #password-box-wrapper {
+	background-color: #fff;
+}
+
+.option-selected {
+	background-color: #708090;
+	color: #eee;
+}
+
+.dark-content .option-selected {
+	background-color: #eee;
+	color: #333;
+}
+
+.dark-content .option-container:hover:not(.option-selected) {
+	background-color: #eee;
+	color: #333;
+}
+
+p {
+	padding: 10px;
+	line-height: 1.5;
+}
+
 @media only screen and (max-width: 425px) {
 	.wrapper .title-left:hover:not(.title-selected), .title-center:hover:not(.title-selected), .title-right:hover:not(.title-selected) {
 		background-color: rgba(0, 0, 0, 0.0);
@@ -549,10 +608,10 @@ h3 {
 	.wrapper .title-left:active:not(.title-selected), .title-center:active:not(.title-selected), .title-right:active:not(.title-selected) {
 		background-color: rgba(0, 0, 0, 0.3);
 	}
-	.option-container:hover {
+	.option-container:hover:not(.option-selected) {
 		background-color: rgba(209, 209, 209, 0.0);
 	}
-	.option-container:active {
+	.option-container:active:not(.option-selected) {
 		background-color: rgba(209, 209, 209, 0.8);
 	}
 	.cell-container {
@@ -585,5 +644,8 @@ h3 {
 	}
 	#right-control-panel.narrow {
 		transform: unset;
+	}
+	.dark-content #sidebar {
+		background-color: #708090;
 	}
 }

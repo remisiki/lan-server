@@ -34,7 +34,7 @@ function createSortOption(name, props) {
 	option_container.classList.add('option-container');
 	before_option.classList.add('before-option');
 	if (name === props.fileSort.by) {
-		before_option.style.backgroundImage = 'url(/assets/select.svg)';
+		before_option.style.backgroundImage = `url(/assets/select${props.theme === 'dark' ? '-white' : ''}.svg)`;
 	}
 
 	sort_option.innerText = `Sort by ${name}`;

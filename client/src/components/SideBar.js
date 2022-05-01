@@ -3,6 +3,7 @@ import { getIconOfFileType, defaultImage } from './utils/util';
 import { timeFormat, sizeFormat, durationFormat } from './utils/format';
 import { fetchMetaData, verifyAdmin } from './http/request';
 import { toggleMessageBox } from './MessageBox';
+import { getThemeMode, setThemeMode, getTheme } from './control/dark';
 import md5 from 'js-md5';
 
 function createSideOption(content, name, icon, onClick) {
@@ -236,15 +237,64 @@ function createAdminSetting(isAdmin) {
 	return wrapper;
 }
 
-function createDarkSetting(isAdmin) {
+function selectTheme(e) {
+	e.currentTarget.parentNode.getElementsByClassName('option-selected').item(0)?.classList.remove('option-selected');
+	e.currentTarget.classList.add('option-selected');
+}
+
+function createDarkSetting(setTheme) {
+	const mode = getThemeMode();
 	const wrapper = document.createElement('div');
 	const caption = document.createElement('h1');
 	caption.innerText = 'Color Theme';
 	wrapper.appendChild(caption);
 
-	wrapper.appendChild(createSideOption('Light', 'light', '/assets/login.svg', () => {}));
-	wrapper.appendChild(createSideOption('Dark', 'dark', '/assets/login.svg', () => {}));
-	wrapper.appendChild(createSideOption('System', 'system', '/assets/login.svg', () => {}));
+	const options = [
+		createSideOption('Light', 'light', '/assets/sun.svg', (e) => {
+			selectTheme(e);
+			setThemeMode(0);
+			setTheme('light');
+		}),
+		createSideOption('Dark', 'dark', '/assets/moon.svg', (e) => {
+			selectTheme(e);
+			setThemeMode(1);
+			setTheme('dark');
+		}),
+		createSideOption('System', 'system', '/assets/auto.svg', (e) => {
+			selectTheme(e);
+			setThemeMode(2);
+			setTheme(getTheme());
+		}),
+	];
+
+	options[mode].classList.add('option-selected');
+	for (const option of options) {
+		wrapper.appendChild(option);
+	}
+
+	return wrapper;
+}
+
+function createSettingInfo() {
+	const wrapper = document.createElement('div');
+	const caption = document.createElement('h1');
+	const paragraph = document.createElement('p');
+
+	caption.innerText = 'About';
+
+	paragraph.innerText = 'Version: 1.0\n© 2022 Remisiki';
+
+	const options = [
+		createSideOption('Github', 'github', '/assets/github.svg', (e) => {
+			window.open('https://github.com/remisiki/lan-share', '_blank').focus();
+		}),
+	];
+
+	wrapper.appendChild(caption);
+	wrapper.appendChild(paragraph);
+	for (const option of options) {
+		wrapper.appendChild(option);
+	}
 
 	return wrapper;
 }
@@ -271,8 +321,9 @@ export function createSettingSideBar(props) {
 	sidebar.id = 'sidebar';
 
 	sidebar.appendChild(close_btn);
-	sidebar.appendChild(createDarkSetting());
+	sidebar.appendChild(createDarkSetting(props.setTheme));
 	sidebar.appendChild(createAdminSetting(props.admin));
+	sidebar.appendChild(createSettingInfo());
 	directory_panel.appendChild(sidebar);
 	setTimeout(() => {
 		sidebar.classList.add('slide-in');
