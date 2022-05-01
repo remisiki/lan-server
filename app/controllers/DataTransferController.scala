@@ -54,6 +54,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
         val base64: String = formData.dataParts.getOrElse("name", Seq("TmV3JTIwRmlsZQ=="))(0)
         val fileName: String = Codec.decodeBase64(base64)
         var publicPath: String = s"${this.sharePath}public/"
+        Files.createDirectories(Paths.get(publicPath))
         var filePath = s"${publicPath}${fileName}"
         val progressFilePath = s"${publicPath}${fileName}.scupload"
         val file = formData.files(0).ref

@@ -413,6 +413,7 @@ img {
 	background-color: rgba(255, 255, 255, 0.9);
 	transition: width 0.1s ease-in-out;
 	border-radius: 15px 0 0 15px;
+	overflow: auto;
 }
 
 #sidebar.slide-in {
@@ -449,6 +450,10 @@ img {
 .info {
 	overflow-wrap: break-word;
 	margin: 10px 20px;
+}
+
+.no-scroll-bar {
+	overflow: scroll;
 }
 
 .no-scroll-bar::-webkit-scrollbar {
@@ -503,7 +508,7 @@ h3 {
 	display: block;
 	position: relative;
 	height: 37px;
-	width: 70%;
+	width: 80%;
 	margin: 10px;
 	padding: 0 10px;
 	border: 2px #708090 solid;
@@ -577,5 +582,8 @@ h3 {
 		width: 100vw;
 		border-radius: unset;
 		background-color: rgba(255, 255, 255, 1.0);
+	}
+	#right-control-panel.narrow {
+		transform: unset;
 	}
 }

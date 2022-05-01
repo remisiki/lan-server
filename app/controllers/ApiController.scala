@@ -35,7 +35,8 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 					var folders: Array[JsObject] = Array(
 						Json.obj(
 							"name" -> this.sharePath,
-							"time" -> 0
+							"time" -> 0,
+							"alias" -> "share"
 						)
 					)
 					for (path <- rootPaths) {

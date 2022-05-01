@@ -78,7 +78,7 @@ export function parseResponseToFiles(response, props) {
 			li.push(
 				<File
 					key={`d-${folder.name}`}
-					name={folder.name}
+					name={folder.alias ?? folder.name}
 					time={folder.time}
 					fileType="folder"
 					onClick={folderOpener}

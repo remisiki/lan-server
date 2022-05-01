@@ -148,6 +148,7 @@ object File {
 				Integer.MAX_VALUE,
 				(p, _) => {
 					this.isParent(path, p.getParent().toString()) &&
+					p.toFile().isFile() &&
 					p
 						.getFileName()
 						.toString()

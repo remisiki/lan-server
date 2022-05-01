@@ -82,6 +82,7 @@ export function createSideBar(file, downloadAction, props) {
 	const path_content = document.createElement('span');
 	const close_btn = document.createElement('img');
 	const file_meta_info_wrapper = document.createElement('div');
+	const wrapper = document.createElement('div');
 	let infos = [];
 
 	close_btn.src = '/assets/close.svg';
@@ -112,7 +113,10 @@ export function createSideBar(file, downloadAction, props) {
 		createInfo(`Last Modified: ${timeFormat(file.time)}`),
 	)
 
-	const relative_path = `/${decodeURIComponent(file.path)}`;
+	let relative_path = decodeURIComponent(file.path);
+	if (!relative_path) {
+		relative_path = '/';
+	}
 	const meta_type = ['image', 'video', 'audio', 'code'];
 	if (meta_type.includes(file.fileType)) {
 		const path = window.btoa(encodeURIComponent(`${relative_path}${file.name}`));
@@ -137,12 +141,17 @@ export function createSideBar(file, downloadAction, props) {
 	sidebar.appendChild(close_btn);
 	sidebar.appendChild(thumb);
 	sidebar.appendChild(name);
+
+	wrapper.classList.add('detail-wrapper');
+	wrapper.classList.add('no-scroll-bar');
 	for (const info of infos) {
-		sidebar.appendChild(info);
+		wrapper.appendChild(info);
 	}
-	sidebar.appendChild(file_meta_info_wrapper);
-	sidebar.appendChild(path);
-	sidebar.appendChild(createSideOption('Download', 'download', '/assets/download.svg', downloadAction));
+	wrapper.appendChild(file_meta_info_wrapper);
+	wrapper.appendChild(path);
+	wrapper.appendChild(createSideOption('Download', 'download', '/assets/download.svg', downloadAction));
+
+	sidebar.appendChild(wrapper);
 	directory_panel.appendChild(sidebar);
 	setTimeout(() => {
 		sidebar.classList.add('slide-in');
@@ -227,6 +236,19 @@ function createAdminSetting(isAdmin) {
 	return wrapper;
 }
 
+function createDarkSetting(isAdmin) {
+	const wrapper = document.createElement('div');
+	const caption = document.createElement('h1');
+	caption.innerText = 'Color Theme';
+	wrapper.appendChild(caption);
+
+	wrapper.appendChild(createSideOption('Light', 'light', '/assets/login.svg', () => {}));
+	wrapper.appendChild(createSideOption('Dark', 'dark', '/assets/login.svg', () => {}));
+	wrapper.appendChild(createSideOption('System', 'system', '/assets/login.svg', () => {}));
+
+	return wrapper;
+}
+
 export function createSettingSideBar(props) {
 	showNarrowFilePanel();
 	const sidebar_exist = document.getElementById('sidebar');
@@ -249,6 +271,7 @@ export function createSettingSideBar(props) {
 	sidebar.id = 'sidebar';
 
 	sidebar.appendChild(close_btn);
+	sidebar.appendChild(createDarkSetting());
 	sidebar.appendChild(createAdminSetting(props.admin));
 	directory_panel.appendChild(sidebar);
 	setTimeout(() => {
