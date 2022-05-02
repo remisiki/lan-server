@@ -11,8 +11,10 @@ GET     /api/v1/file_list                controllers.ApiController.getFileList(p
 GET     /api/v1/thumb                controllers.ApiController.getThumbnail(path: String)
 GET     /api/v1/meta                controllers.ApiController.getMetaData(path: String)
 GET     /api/v1/admin                controllers.ApiController.checkAdmin()
+GET     /api/v1/delete                controllers.ApiController.deleteFile(base64: String)
 
-GET     /download/*base64               controllers.DataTransferController.downloadFile(base64: String)
+GET     /view/*base64               controllers.DataTransferController.downloadFile(base64: String, preview: Boolean = true)
+GET     /download/*base64               controllers.DataTransferController.downloadFile(base64: String, preview: Boolean = false)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.versioned(path="/public", file: Asset)

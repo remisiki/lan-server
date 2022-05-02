@@ -39,6 +39,31 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 							"alias" -> "share"
 						)
 					)
+					try {
+						val conf = applicationConf.getList("extraPath")
+						if (conf.size() > 0) {
+							val list = conf.unwrapped()
+							for (i <- 0 until list.size()) {
+								val item = list.get(i).asInstanceOf[java.util.HashMap[String, String]]
+								folders = folders :+ Json.obj(
+									"name" -> item.get("path"),
+									"time" -> 0,
+									"alias" -> item.get("alias")
+								)
+							}
+						}
+					} catch {
+						case e: Exception =>  {
+							val conf = Json.parse(applicationConf.getString("extraPath")).as[JsArray].value
+							for (item <- conf) {
+								folders = folders :+ Json.obj(
+									"name" -> (item \ "path").as[String],
+									"time" -> 0,
+									"alias" -> (item \ "alias").as[String]
+								)
+							}
+						}
+					}
 					for (path <- rootPaths) {
 						folders = folders :+ Json.obj(
 							"name" -> path.replace("\\", ""),
@@ -118,6 +143,30 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 		}
 	}
 
+	def deleteFile(base64: String) = Action {
+		implicit request: Request[AnyContent] => {
+			val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
+			if (!isAdmin) {
+				Ok(Json.obj("error" -> true, "info" -> "You are not admin"))
+			}
+			else {
+				try {
+					val uriDecoded: String = Codec.decodeBase64(base64)
+					val absolutePath: String = Admin.getRealPath(uriDecoded, isAdmin)
+					val file: File = new File(absolutePath)
+					if (file.exists() && file.isFile()) {
+						Ok(Json.obj("error" -> !file.delete()))
+					}
+					else {
+						Ok(Json.obj("error" -> true, "info" -> "File not exists"))
+					}
+				} catch {
+					case e: Exception => Ok(Json.obj("error" -> true, "info" -> "Failed to delete"))
+				}
+			}
+		}
+	}
+
 	def test() = Action {
 		implicit request: Request[AnyContent] => {
 			// println(types.File.getMetaData("./app/controllers/ApiController.scala"))
@@ -125,7 +174,17 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 			
 			// println(Admin.verifyCookie(request.cookies))
 			// types.File.findFilesByName("D:/Scala/lan-share/app", "a.txt").foreach(println)
-			println(types.File.getMetaData("a.jpg"))
+			// println((new types.File("a.c")).getMetaData())
+			val conf = applicationConf.getList("extraPath")
+			if (conf.size() > 0) {
+				val list = conf.unwrapped()
+				for (i <- 0 until list.size()) {
+					val item = list.get(i).asInstanceOf[java.util.HashMap[String, String]]
+					println(item.get("path"), item.get("alias"))
+				}
+			}
+			// .get(1).asInstanceOf[java.util.HashMap[String, String]].asScala
+			// println(map.get("alias"))
 			Ok("")
 		}
 	}
@@ -159,7 +218,8 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 				else
 					false
 			},
-			"path" -> Codec.encodeUri(thumbPath.replace(fileName, ""))
+			"path" -> Codec.encodeUri(thumbPath.replace(fileName, "")),
+			"view" -> types.File.isPreviewable(fileName)
 		)
 	}
 

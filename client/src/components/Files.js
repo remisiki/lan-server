@@ -89,12 +89,6 @@ export function parseResponseToFiles(response, props) {
 	if (response.files) {
 		for (const file of response.files) {
 			const thumb = (file.thumb) ? (file.thumb) : null;
-			const downloadAction = () => {
-				const path = `${props.path}${file.name}`;
-				const base64 = window.btoa(encodeURIComponent(path));
-				const url = `/download/${base64}`;
-				window.open(url, '_blank').focus();
-			};
 			li.push(
 				<File
 					key={`f-${file.name}-${file.path}`}
@@ -103,7 +97,7 @@ export function parseResponseToFiles(response, props) {
 					fileType={file.fileType}
 					thumb={thumb}
 					onClick={(e) => {
-						createSideBar(file, downloadAction, props);
+						createSideBar(file, props);
 						setFileSelected(e);
 					}}
 				/>);
@@ -161,7 +155,7 @@ export function clearFileSelected() {
 	}
 }
 
-async function refreshPage(props) {
+export async function refreshPage(props) {
 	const response = await fetchData(props.path);
 	const li = parseResponseToFiles(response, props);
 	props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));

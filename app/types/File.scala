@@ -16,10 +16,11 @@ class File(path: String) extends java.io.File(path) {
 	def getTime(): Long = this.lastModified
 
 	def getMetaData(): JsObject = {
-		Json.obj(
+		val jsonData: JsObject = Json.obj(
 			"size" -> this.size,
-			"time" -> this.lastModified
+			"time" -> this.lastModified,
 		)
+		jsonData
 	}
 }
 
@@ -29,6 +30,7 @@ object File {
 	private val videoExt: Array[String] = Array(".mp4", ".avi", ".flv", ".m4v", ".mkv", ".wmv", ".vob", ".mpg", ".mpeg", ".mpe", ".mov", ".3gp")
 	private val audioExt: Array[String] = Array(".mp3", ".m4a", ".aac", ".flac", ".ogg", ".voc", ".wav", ".wma")
 	private val codeExt: Array[String] = Array(".c", ".cpp", ".h", ".hpp", ".java", ".jar", ".dll", ".so", ".class", ".scala", ".py", ".pyc", ".pyd", ".asm", ".s", ".v", ".sv", ".svh", ".js", ".jsx", ".jsp", ".ts", ".tsx", ".html", ".htm", ".css", ".scss", ".json", ".csv", ".tsv", ".mtx", ".db", ".sql", ".sqlite3", ".bat", ".sh", ".ps1", ".inf", ".ini", ".inl", ".conf", ".xml", ".pas", ".sbl", ".php", ".dat", ".log", ".lock", ".cgi", ".pl", ".asp", ".aspx", ".rss", ".xhtml", ".swift", ".vb", ".bak", ".cfg", ".cab", ".dmp", ".sys", ".cmd", ".cs", ".csx", ".cmake", ".cob", ".clj", ".coffee", ".lisp", ".cu", ".pyx", ".elm", ".erl", ".fs", ".f77", ".go", ".hs", ".hsc", ".ipynb", ".kt", ".lua", ".mak", ".m", ".r", ".rb", ".rs", ".sbt", ".bash", ".tex", ".bib", ".vhdl", ".vue", ".yml", ".yaml", ".md", ".rst")
+	private val previewableExt: Array[String] = this.imageExt ++ Array(".mp4", ".mp3", ".pdf")
 	private val extensionMap: Map[String, String] = {
 		var map: Map[String, String] = Map.empty
 		for (key <- imageExt) {
@@ -129,6 +131,11 @@ object File {
 	def isCode(fileName: String): Boolean = {
 		val ext: String = this.getExt(fileName)
 		this.codeExt.contains(ext)
+	}
+
+	def isPreviewable(fileName: String): Boolean = {
+		val ext: String = this.getExt(fileName)
+		this.previewableExt.contains(ext)
 	}
 
 	def getFileType(fileName: String): String = {

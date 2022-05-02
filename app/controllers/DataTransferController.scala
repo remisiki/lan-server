@@ -20,7 +20,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
   private val applicationConf: Config = ConfigFactory.load("application.conf")
   private val sharePath = applicationConf.getString("sharePath")
 
-  def downloadFile(base64: String) = Action {
+  def downloadFile(base64: String, preview: Boolean) = Action {
     implicit request: Request[AnyContent] => {
       val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
       val uriDecoded: String = Codec.decodeBase64(base64)
@@ -34,12 +34,22 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
           val uriEncodedFileName: String = Codec.encodeUri(file.getName())
           val source: Source[ByteString, _] = FileIO.fromPath(Paths.get(absolutePath))
           val contentType: String = types.File.getMimeType(absolutePath)
-          Result(
-            header = ResponseHeader(200, Map(
-              CONTENT_DISPOSITION -> s"attachment; filename=${uriEncodedFileName}"
-            )),
-            body = HttpEntity.Streamed(source, Some(file.length()), Some(contentType))
-          )
+          if (preview) {
+            Result(
+              header = ResponseHeader(200, Map(
+                // CONTENT_DISPOSITION -> s"attachment; filename=${uriEncodedFileName}"
+              )),
+              body = HttpEntity.Streamed(source, Some(file.length()), Some(contentType))
+            )
+          }
+          else {
+            Result(
+              header = ResponseHeader(200, Map(
+                CONTENT_DISPOSITION -> s"attachment; filename=${uriEncodedFileName}"
+              )),
+              body = HttpEntity.Streamed(source, Some(file.length()), Some(contentType))
+            )
+          }
         }
         else {
           NotFound("")
@@ -58,7 +68,7 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
         val uploadDone: Boolean = (formData.dataParts.getOrElse("done", Seq("true"))(0) == "true")
         val base64: String = formData.dataParts.getOrElse("name", Seq("TmV3JTIwRmlsZQ=="))(0)
         val fileName: String = Codec.decodeBase64(base64)
-        var publicPath: String = s"${this.sharePath}public/"
+        val publicPath: String = s"${this.sharePath}public/"
         Files.createDirectories(Paths.get(publicPath))
         var filePath = s"${publicPath}${fileName}"
         val progressFilePath = s"${publicPath}${fileName}.scupload"
@@ -82,6 +92,9 @@ class DataTransferController @Inject()(val controllerComponents: ControllerCompo
           if (dotPosition > 0) {
             ext = newFileName.substring(dotPosition, newFileName.length)
             fileBaseName = newFileName.substring(0, dotPosition)
+          }
+          else {
+            fileBaseName = fileName
           }
           while (!progressFile.renameTo(new File(filePath))) {
             filePath = s"${publicPath}${fileBaseName}_${renameCount}${ext}"

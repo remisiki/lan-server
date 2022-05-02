@@ -82,6 +82,9 @@ function uploadFile(file) {
 					setFullProgressBar();
 					setProgressBarColor('red', 5000);
 				});
+			if (done) {
+				document.getElementById('file-upload').value = '';
+			}
 		}
 	};
 	sendFilePart();

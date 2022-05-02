@@ -29,7 +29,7 @@ function App() {
 			<header>
 				{path && <NavigationBlock {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}}/>}
 			</header>
-			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, theme: theme, setTheme: setTheme}} />}
+			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}} />}
 			<ScrollHandler />
 		</div>
 	);

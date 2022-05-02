@@ -10,9 +10,10 @@ function getHelper(url, config) {
 
 export async function get(url, params = {}) {
 	const headers = {
-		// headers: {
-		//   'Authorization': `Bearer ${decrypted}`
-		// }
+		headers: {
+		  // 'Authorization': `Bearer ${decrypted}`
+		  'Accept': 'application/json'
+		}
 	};
 	const config = {
 		headers: headers,
@@ -49,4 +50,13 @@ export async function verifyAdmin() {
 	const url = '/api/v1/admin';
 	const response = await get(url);
 	return response.admin;
+}
+
+export async function deleteFile(base64) {
+	const url = '/api/v1/delete';
+	const params = {
+		base64: base64
+	};
+	const response = await get(url, params);
+	return response;
 }

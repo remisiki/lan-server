@@ -1,7 +1,7 @@
-import { showNarrowFilePanel, hideNarrowFilePanel, clearFileSelected } from './Files';
+import { showNarrowFilePanel, hideNarrowFilePanel, clearFileSelected, refreshPage } from './Files';
 import { getIconOfFileType, defaultImage } from './utils/util';
 import { timeFormat, sizeFormat, durationFormat } from './utils/format';
-import { fetchMetaData, verifyAdmin } from './http/request';
+import { fetchMetaData, verifyAdmin, deleteFile } from './http/request';
 import { toggleMessageBox } from './MessageBox';
 import { getThemeMode, setThemeMode, getTheme } from './control/dark';
 import { setFullProgressBar, setProgressBarColor } from './Uploader';
@@ -71,7 +71,7 @@ async function createMetaInfo(wrapper, path) {
 	}
 }
 
-export function createSideBar(file, downloadAction, props) {
+export function createSideBar(file, props) {
 	showNarrowFilePanel();
 	const sidebar_exist = document.getElementById('sidebar');
 	if (sidebar_exist) {
@@ -156,7 +156,37 @@ export function createSideBar(file, downloadAction, props) {
 	}
 	wrapper.appendChild(file_meta_info_wrapper);
 	wrapper.appendChild(path);
-	wrapper.appendChild(createSideOption('Download', 'download', '/assets/download.svg', downloadAction));
+
+	const downloadAction = (preview = false) => {
+		const path = `/${decodeURIComponent(file.path)}${file.name}`;
+		const base64 = window.btoa(encodeURIComponent(path));
+		const url = `/${preview ? 'view' : 'download'}/${base64}`;
+		window.open(url, '_blank').focus();
+	};
+	const deleteAction = () => {
+		const path = `/${decodeURIComponent(file.path)}${file.name}`;
+		const base64 = window.btoa(encodeURIComponent(path));
+		const response = deleteFile(base64);
+		if (response.error) {
+			toggleMessageBox(response.info, 5000);
+			setFullProgressBar();
+			setProgressBarColor('red', 5000);
+		}
+		else {
+			refreshPage(props);
+			hideSideBar();
+			toggleMessageBox('Success', 2000);
+			setFullProgressBar();
+			setProgressBarColor('green', 2000);
+		}
+	};
+	if (file.view) {
+		wrapper.appendChild(createSideOption('View', 'view', '/assets/view.svg', () => downloadAction(true)));
+	}
+	wrapper.appendChild(createSideOption('Download', 'download', '/assets/download.svg', () => downloadAction()));
+	if (props.admin) {
+		wrapper.appendChild(createSideOption('Delete', 'delete', '/assets/delete.svg', () => deleteAction()));
+	}
 
 	sidebar.appendChild(wrapper);
 	directory_panel.appendChild(sidebar);
@@ -182,7 +212,7 @@ async function login() {
 	input.classList.add('gray');
 	log_in_btn.classList.add('hide');
 	const user_cookie_value = window.btoa(md5(encodeURIComponent(password)));
-	document.cookie = `_user=${user_cookie_value}`;
+	document.cookie = `_user=${user_cookie_value};expires=${new Date('2099-12-31T23:59:59').toUTCString()}`;
 	const isAdmin = await verifyAdmin();
 	if (isAdmin) {
 		toggleMessageBox("Welcome!");
