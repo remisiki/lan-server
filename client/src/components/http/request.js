@@ -49,7 +49,6 @@ export async function fetchMetaData(path) {
 export async function verifyAdmin() {
 	const url = '/api/v1/admin';
 	const response = await get(url);
-	console.log(response.admin)
 	return response.admin;
 }
 
