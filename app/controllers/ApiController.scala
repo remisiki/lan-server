@@ -100,7 +100,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 		implicit request: Request[AnyContent] => {
 			val isAdmin: Boolean = Admin.verifyCookie(request.cookies)
 			val filePath: String = Admin.getRealPath(Codec.decodeBase64(path), isAdmin)
-			val tmpPath: String = Paths.get(System.getProperty("java.io.tmpdir"), ".com.remisiki.lan.server", "thumnail").toString()
+			val tmpPath: String = Paths.get(System.getProperty("java.io.tmpdir"), ".com.remisiki.lan.share", "thumbnail").toString()
 			Files.createDirectories(Paths.get(tmpPath))
 			val cacheFilePath: String = {
 				if (types.File.isParent(tmpPath, filePath)) {
