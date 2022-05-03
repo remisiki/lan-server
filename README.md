@@ -59,13 +59,17 @@ Or set environment properties in sbt:
 eval System.setProperty("PLAY_HTTP_PORT", "8000")
 eval System.setProperty("ADMIN_KEY", "another_key")
 eval System.setProperty("LAN_SHARE_PATH", "/home/user/Videos")
-eval System.setProperty("LAN_SHARE_EXTRA_PATH", """"[{"path":"/","alias":"root"},{"path":"/home/","alias":"home"}]""")
+eval System.setProperty("LAN_SHARE_EXTRA_PATH", """[{"path":"/","alias":"root"},{"path":"/home/","alias":"home"}]""")
 ```
 
-## Fat JAR
+### Fat JAR
 
 No scala environment is required to run the fat jar. JDK 8 should be installed, other versions of Java may also work but not tested.
 
 ```shell
 java -DPLAY_HTTP_PORT=1234 -DADMIN_KEY='hogehoge' -DLAN_SHARE_PATH='C:/Users/user/Documents' -DLAN_SHARE_EXTRA_PATH='"""[{""""path"""":""""E:/game"""",""""alias"""":""""game""""}]"""' -jar lan-share-assembly-1.0-SNAPSHOT.jar
 ```
+
+## Cache
+
+To clear image thumbnail cache, clear `.com.remisiki.lan.share/thumbnail/` under the system temp directory.
