@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { imgLoadErrorFallback, getIconOfFileType } from './utils/util';
+import { trim, hashToPath } from './utils/format';
 import { createSideBar, hideSideBar } from './SideBar';
 import { hideSearchBox } from './SearchBox';
 import { toggleSortPanel, sortDirectionSelector, sortFiles } from './SortPanel';
@@ -25,13 +26,20 @@ function File({name, time, fileType, thumb, onClick}) {
 	);
 }
 
+function hashChangeHandler(props) {
+	hideSideBar();
+	hideSearchBox();
+	setPathDisplay();
+	refreshPage(props);
+}
+
 export function Files(props) {
 	useEffect(() => {
-		hideSideBar();
-		hideSearchBox();
-		setPathDisplay(props.path);
-		refreshPage(props);
-	}, [props.path]);
+		window.addEventListener('hashchange', () => {
+			hashChangeHandler(props);
+		});
+		hashChangeHandler(props);
+	}, []);
 	useEffect(() => {
 		if (!props.data) return;
 		props.setData(sortFiles(props.data, props.fileSort.by, props.fileSort.descending));
@@ -70,11 +78,7 @@ export function parseResponseToFiles(response, props) {
 	if (response.folders) {
 		for (const folder of response.folders) {
 			const folderOpener = () => {
-				const child = `${props.path}${folder.name}/`;
-				let paths_copy = props.paths;
-				paths_copy.unshift(child);
-				props.setPaths(paths_copy);
-				props.setPath(child);
+				window.location.hash += `${folder.name}/`;
 			};
 			li.push(
 				<File
@@ -156,13 +160,15 @@ export function clearFileSelected() {
 }
 
 export async function refreshPage(props) {
-	const response = await fetchData(props.path);
+	const path = hashToPath();
+	const response = await fetchData(path);
 	const li = parseResponseToFiles(response, props);
 	props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
 }
 
-function setPathDisplay(path) {
-	let folder_name = path.slice(0, -1);
+function setPathDisplay() {
+	const path = hashToPath();
+	let folder_name = trim(path);
 	if (folder_name) {
 		folder_name = folder_name.slice(folder_name.lastIndexOf('/') + 1, folder_name.length);
 	}

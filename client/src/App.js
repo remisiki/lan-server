@@ -6,18 +6,14 @@ import { verifyAdmin } from './components/http/request';
 import { getTheme, checkThemeMode } from './components/control/dark';
 
 function App() {
-	const [path, setPath] = useState('/');
-	const [paths, setPaths] = useState(['/']);
 	const [data, setData] = useState(false);
 	const [fileSort, setFileSort] = useState({by: "time", descending: true});
-	const [admin, setAdmin] = useState(false);
+	const [admin, setAdmin] = useState(null);
 	const [theme, setTheme] = useState(getTheme());
 	useEffect(() => {
 		async function verifyAdminWorker() {
 			const isAdmin = await verifyAdmin();
-			if (isAdmin) {
-				setAdmin(true);
-			}
+			setAdmin(isAdmin);
 		}
 		verifyAdminWorker();
 	}, []);
@@ -27,9 +23,9 @@ function App() {
 	return (
 		<div>
 			<header>
-				{path && <NavigationBlock {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}}/>}
+				<NavigationBlock {...{data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}}/>
 			</header>
-			{path && <Files {...{path: path, setPath: setPath, paths: paths, setPaths: setPaths, data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}} />}
+			{(admin !== null) && <Files {...{data: data, setData: setData, fileSort: fileSort, setFileSort: setFileSort, admin: admin, theme: theme, setTheme: setTheme}} />}
 			<ScrollHandler />
 		</div>
 	);

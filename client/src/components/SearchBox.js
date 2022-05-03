@@ -2,6 +2,7 @@ import { get } from './http/request';
 import { hideSideBar } from './SideBar';
 import { sortFiles } from './SortPanel';
 import { parseResponseToFiles } from './Files';
+import { hashToPath } from './utils/format';
 
 async function searchHandler(e, props) {
 	if (e.keyCode === 13) {
@@ -11,7 +12,7 @@ async function searchHandler(e, props) {
 		hideSideBar();
 		const url = '/api/v1/file_list';
 		const params = {
-			path: props.path,
+			path: hashToPath(),
 			search: encodeURIComponent(search_qs)
 		};
 		const response = await get(url, params);

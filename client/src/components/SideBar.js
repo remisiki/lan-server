@@ -1,6 +1,6 @@
 import { showNarrowFilePanel, hideNarrowFilePanel, clearFileSelected, refreshPage } from './Files';
 import { getIconOfFileType, defaultImage } from './utils/util';
-import { timeFormat, sizeFormat, durationFormat } from './utils/format';
+import { timeFormat, sizeFormat, durationFormat, pathIsEqual, hashToPath } from './utils/format';
 import { fetchMetaData, verifyAdmin, deleteFile } from './http/request';
 import { toggleMessageBox } from './MessageBox';
 import { getThemeMode, setThemeMode, getTheme } from './control/dark';
@@ -34,8 +34,9 @@ function createInfo(content) {
 	return info;
 }
 
-async function createMetaInfo(wrapper, path) {
+async function createMetaInfo(wrapper, file) {
 	let infos = [];
+	const path = window.btoa(file.path + encodeURIComponent(file.name));
 	const response = await fetchMetaData(path);
 	if (response.error) {
 		toggleMessageBox('File or folder may be removed. Please reload!', 5000);
@@ -88,7 +89,6 @@ export function createSideBar(file, props) {
 	const path_before = document.createElement('span');
 	const path_content = document.createElement('span');
 	const close_btn = document.createElement('img');
-	const file_meta_info_wrapper = document.createElement('div');
 	const wrapper = document.createElement('div');
 	let infos = [];
 
@@ -124,22 +124,14 @@ export function createSideBar(file, props) {
 	if (!relative_path) {
 		relative_path = '/';
 	}
-	const meta_type = ['image', 'video', 'audio', 'code'];
-	if (meta_type.includes(file.fileType)) {
-		const path = window.btoa(encodeURIComponent(`${relative_path}${file.name}`));
-		createMetaInfo(file_meta_info_wrapper, path);
-	}
 
 	path_content.innerText = relative_path;
 	path_content.classList.add('link-text');
 	path_content.addEventListener('click', () => {
-		if (props.path !== `/${decodeURIComponent(file.path)}`) {
-			let paths_copy = props.paths;
-			paths_copy.unshift(relative_path);
-			props.setPaths(paths_copy);
-			props.setPath(relative_path);
+		if (!pathIsEqual(hashToPath(), relative_path)) {
+			window.location.hash = relative_path;
 		}
-	})
+	});
 	path_before.innerText = 'Path: ';
 	path.classList.add('info');
 	path.appendChild(path_before);
@@ -154,7 +146,12 @@ export function createSideBar(file, props) {
 	for (const info of infos) {
 		wrapper.appendChild(info);
 	}
-	wrapper.appendChild(file_meta_info_wrapper);
+	const meta_type = ['image', 'video', 'audio', 'code'];
+	if (meta_type.includes(file.fileType)) {
+		const file_meta_info_wrapper = document.createElement('div');
+		createMetaInfo(file_meta_info_wrapper, file);
+		wrapper.appendChild(file_meta_info_wrapper);
+	}
 	wrapper.appendChild(path);
 
 	const downloadAction = (preview = false) => {
@@ -217,6 +214,7 @@ async function login() {
 	if (isAdmin) {
 		toggleMessageBox("Welcome!");
 		setTimeout(() => {
+			window.location.hash = '';
 			window.location.reload();
 		}, 2000);
 	}
@@ -237,6 +235,7 @@ function logout() {
 	document.cookie = '_user=;Max-Age=0';
 	toggleMessageBox('Logged out');
 	setTimeout(() => {
+		window.location.hash = '';
 		window.location.reload();
 	}, 2000);
 }

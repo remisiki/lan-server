@@ -6,37 +6,16 @@ import { fetchHomeData } from './http/request';
 import { sortFiles } from './SortPanel';
 
 export function NavigationBlock(props) {
-	const backActionHandler = async () => {
+	const backActionHandler = () => {
 		if (document.getElementById('sidebar')) {
 			hideSideBar();
 		}
 		else {
-			if (props.path === '/') {
-				hideSearchBox();
-				const response = await fetchHomeData();
-				const li = parseResponseToFiles(response, props);
-				props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
-				return;
-			}
-			let paths_copy = props.paths;
-			paths_copy.shift();
-			props.setPaths(paths_copy);
-			props.setPath(props.paths[0]);
+			window.history.back();
 		}
 	};
-	const homeActionHandler = async () => {
-		if (document.getElementById('sidebar')) {
-			hideSideBar();
-		}
-		if (props.path === '/') {
-			hideSearchBox();
-			const response = await fetchHomeData();
-			const li = parseResponseToFiles(response, props);
-			props.setData(sortFiles(li, props.fileSort.by, props.fileSort.descending));
-			return;
-		}
-		props.setPaths(['/']);
-		props.setPath('/');
+	const homeActionHandler = () => {
+		window.location.hash = '';
 	};
 	return (
 		<div className="wrapper nav-block">

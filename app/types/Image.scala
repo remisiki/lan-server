@@ -45,6 +45,7 @@ class Image(file: File) extends Media(file) {
 					jsonData = jsonData + (name -> this.traversalMetadata(metaData.getAsTree(name)))
 				}
 			}
+			stream.close()
 			jsonData
 		}
 		catch {

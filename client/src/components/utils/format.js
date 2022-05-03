@@ -37,3 +37,37 @@ export function durationFormat(duration) {
 	}
 	return duration_str;
 }
+
+export function trim(s, c = '/') {
+	let _s = s;
+	for (let i = 0; i < _s.length; i ++) {
+		if (_s[i] === c) {
+			_s = _s.slice(1);
+		}
+		else {
+			break;
+		}
+	}
+	for (let i = _s.length - 1; i > 0; i --) {
+		if (_s[i] === c) {
+			_s = _s.slice(0, _s.length - 1);
+		}
+		else {
+			break;
+		}
+	}
+	return _s;
+}
+
+export function completePath(path) {
+	return `/${path}/`;
+}
+
+export function pathIsEqual(a, b) {
+	return trim(a) === trim(b)
+}
+
+export function hashToPath() {
+	const path = trim(decodeURIComponent(window.location.hash), '#');
+	return path ? path : '/';
+}
