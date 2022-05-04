@@ -218,7 +218,7 @@ class ApiController @Inject()(val controllerComponents: ControllerComponents) ex
 				else
 					false
 			},
-			"path" -> Codec.encodeUri(thumbPath.replace(fileName, "")),
+			"path" -> Codec.encodeUri(thumbPath.stripSuffix(fileName)),
 			"view" -> types.File.isPreviewable(fileName)
 		)
 	}

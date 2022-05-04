@@ -31,9 +31,9 @@ class Image(file: File) extends Media(file) {
 	override def getMetaData(): JsObject = {
 		val file: types.File = new types.File(this.file)
 		var jsonData: JsObject = file.getMetaData()
+		val buffer: BufferedImage = ImageIO.read(this.file)
+		val stream: ImageInputStream = ImageIO.createImageInputStream(this.file)
 		try {
-			val buffer: BufferedImage = ImageIO.read(this.file)
-			val stream: ImageInputStream = ImageIO.createImageInputStream(this.file)
 			val readers: java.util.Iterator[ImageReader] = ImageIO.getImageReaders(stream)
 			jsonData = jsonData ++ Json.obj("width" -> buffer.getWidth(), "height" -> buffer.getHeight())
 			if (readers.hasNext) {
@@ -45,12 +45,13 @@ class Image(file: File) extends Media(file) {
 					jsonData = jsonData + (name -> this.traversalMetadata(metaData.getAsTree(name)))
 				}
 			}
-			stream.close()
-			jsonData
 		}
 		catch {
-			case e: Exception => jsonData
+			case e: Exception => ()
+		} finally {
+			stream.close()
 		}
+		jsonData
 	}
 
 	def traversalMetadata(node: Node): JsObject = {
