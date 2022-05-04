@@ -67,6 +67,12 @@ eval System.setProperty("LAN_SHARE_EXTRA_PATH", """[{"path":"/","alias":"root"},
 No scala environment is required to run the fat jar. JDK 8 should be installed, other versions of Java may also work but not tested.
 
 ```shell
+java -DPLAY_HTTP_PORT=1234 -DADMIN_KEY='hogehoge' -DLAN_SHARE_PATH='/home' -DLAN_SHARE_EXTRA_PATH='[{"path":"/","alias":"root"}]' -jar lan-share-assembly-1.0-SNAPSHOT.jar
+```
+
+For Powershell, the command should be:
+
+```shell
 java -DPLAY_HTTP_PORT=1234 -DADMIN_KEY='hogehoge' -DLAN_SHARE_PATH='C:/Users/user/Documents' -DLAN_SHARE_EXTRA_PATH='"""[{""""path"""":""""E:/game"""",""""alias"""":""""game""""}]"""' -jar lan-share-assembly-1.0-SNAPSHOT.jar
 ```
 
