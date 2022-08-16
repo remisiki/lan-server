@@ -1,5 +1,7 @@
 # lan-share
 
+**WARNING: This version is no longer safe. An improved (currently secure) application is deployed as [Ikimi Drive](https://drive.remisiki.com).**
+
 A localhost server to transfer data within a LAN.
 
 Written with [Scala Play Framework](https://www.playframework.com/) and [React.js](https://ja.reactjs.org/).
